@@ -103,6 +103,13 @@ export function HabitApp() {
 
 type Store = ReturnType<typeof useHabitStore>;
 
+function formatTs(ts: string | null): string {
+  if (!ts) return "";
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return ts;
+  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
 /* ============================ TODAY ============================ */
 function TodayTab({ store }: { store: Store }) {
   const now = new Date();
@@ -486,10 +493,10 @@ function TodosTab({ store }: { store: Store }) {
 
   const add = () => {
     if (!text.trim()) return;
-    store.update((s) => ({ ...s, todos: [...s.todos, { id: uid(), text: text.trim(), done: false, createdAt: todayStr(), completedAt: null }] }));
+    store.update((s) => ({ ...s, todos: [...s.todos, { id: uid(), text: text.trim(), done: false, createdAt: new Date().toISOString(), completedAt: null }] }));
     setText("");
   };
-  const toggle = (id: string) => store.update((s) => ({ ...s, todos: s.todos.map((t) => t.id === id ? { ...t, done: !t.done, completedAt: !t.done ? todayStr() : null } : t) }));
+  const toggle = (id: string) => store.update((s) => ({ ...s, todos: s.todos.map((t) => t.id === id ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toISOString() : null } : t) }));
   const del = (id: string) => store.update((s) => ({ ...s, todos: s.todos.filter((t) => t.id !== id) }));
   const saveEdit = (id: string) => {
     store.update((s) => ({ ...s, todos: s.todos.map((t) => t.id === id ? { ...t, text: editText } : t) }));
@@ -519,7 +526,10 @@ function TodosTab({ store }: { store: Store }) {
                 </>
               ) : (
                 <>
-                  <div style={{ flex: 1, fontSize: 14 }}>{t.text}</div>
+                  <div style={{ flex: 1, fontSize: 14 }}>
+                    <div>{t.text}</div>
+                    <Muted style={{ fontSize: 11 }}>Added {formatTs(t.createdAt)}</Muted>
+                  </div>
                   <Button variant="ghost" onClick={() => { setEditingId(t.id); setEditText(t.text); }}><IconPencil /></Button>
                   <Button variant="danger" onClick={() => del(t.id)}><IconTrash /></Button>
                 </>
@@ -538,7 +548,7 @@ function TodosTab({ store }: { store: Store }) {
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
                 <Checkbox checked onClick={() => toggle(t.id)} />
                 <div style={{ flex: 1, fontSize: 14, color: COLORS.sub, textDecoration: "line-through" }}>{t.text}</div>
-                <Muted style={{ fontSize: 12 }}>{t.completedAt}</Muted>
+                <Muted style={{ fontSize: 12 }}>{formatTs(t.completedAt)}</Muted>
                 <Button variant="danger" onClick={() => del(t.id)}><IconTrash /></Button>
               </div>
             ))}
@@ -573,10 +583,10 @@ function BuysTab({ store }: { store: Store }) {
 
   const add = () => {
     if (!text.trim()) return;
-    store.update((s) => ({ ...s, buys: [...s.buys, { id: uid(), text: text.trim(), price: Number(price) || 0, done: false, createdAt: todayStr(), completedAt: null }] }));
+    store.update((s) => ({ ...s, buys: [...s.buys, { id: uid(), text: text.trim(), price: Number(price) || 0, done: false, createdAt: new Date().toISOString(), completedAt: null }] }));
     setText(""); setPrice("");
   };
-  const toggle = (id: string) => store.update((s) => ({ ...s, buys: s.buys.map((b) => b.id === id ? { ...b, done: !b.done, completedAt: !b.done ? todayStr() : null } : b) }));
+  const toggle = (id: string) => store.update((s) => ({ ...s, buys: s.buys.map((b) => b.id === id ? { ...b, done: !b.done, completedAt: !b.done ? new Date().toISOString() : null } : b) }));
   const del = (id: string) => store.update((s) => ({ ...s, buys: s.buys.filter((b) => b.id !== id) }));
   const saveEdit = (id: string) => {
     store.update((s) => ({ ...s, buys: s.buys.map((b) => b.id === id ? { ...b, text: editText, price: Number(editPrice) || 0 } : b) }));
@@ -587,7 +597,7 @@ function BuysTab({ store }: { store: Store }) {
   const completed = store.state.buys.filter((b) => b.done);
   const totalActive = active.reduce((s, b) => s + b.price, 0);
   const totalAll = store.state.buys.reduce((s, b) => s + b.price, 0);
-  const fmt = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -617,7 +627,10 @@ function BuysTab({ store }: { store: Store }) {
                 </>
               ) : (
                 <>
-                  <div style={{ flex: 1, fontSize: 14 }}>{b.text}</div>
+                  <div style={{ flex: 1, fontSize: 14 }}>
+                    <div>{b.text}</div>
+                    <Muted style={{ fontSize: 11 }}>Added {formatTs(b.createdAt)}</Muted>
+                  </div>
                   <div style={{ fontSize: 14 }}>{fmt(b.price)}</div>
                   <Button variant="ghost" onClick={() => { setEditingId(b.id); setEditText(b.text); setEditPrice(String(b.price)); }}><IconPencil /></Button>
                   <Button variant="danger" onClick={() => del(b.id)}><IconTrash /></Button>
@@ -638,7 +651,7 @@ function BuysTab({ store }: { store: Store }) {
                 <Checkbox checked onClick={() => toggle(b.id)} />
                 <div style={{ flex: 1, fontSize: 14, color: COLORS.sub, textDecoration: "line-through" }}>{b.text}</div>
                 <div style={{ fontSize: 14, color: COLORS.sub }}>{fmt(b.price)}</div>
-                <Muted style={{ fontSize: 12 }}>{b.completedAt}</Muted>
+                <Muted style={{ fontSize: 12 }}>{formatTs(b.completedAt)}</Muted>
                 <Button variant="danger" onClick={() => del(b.id)}><IconTrash /></Button>
               </div>
             ))}
