@@ -103,6 +103,13 @@ export function HabitApp() {
 
 type Store = ReturnType<typeof useHabitStore>;
 
+function formatTs(ts: string | null): string {
+  if (!ts) return "";
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return ts;
+  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
 /* ============================ TODAY ============================ */
 function TodayTab({ store }: { store: Store }) {
   const now = new Date();
