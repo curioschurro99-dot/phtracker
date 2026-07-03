@@ -109,7 +109,17 @@ function formatTs(ts: string | null): string {
   if (!ts) return "";
   const d = new Date(ts);
   if (isNaN(d.getTime())) return ts;
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Singapore",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
 }
 
 /* ============================ TODAY ============================ */
