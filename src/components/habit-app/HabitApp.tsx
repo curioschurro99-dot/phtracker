@@ -205,6 +205,175 @@ function TodayTab({ store }: { store: Store }) {
           ))}
         </div>
       </Card>
+
+      <SleepLogCard store={store} dateStr={today} />
+    </div>
+  );
+}
+
+/* ============================ SLEEP LOG (Today) ============================ */
+function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
+  const existing = store.state.sleepLogs[dateStr];
+  const [bedtime, setBedtime] = useState(existing?.bedtime || "");
+  const [wake, setWake] = useState(existing?.wake || "");
+  const [quality, setQuality] = useState(existing?.quality || "");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setBedtime(existing?.bedtime || "");
+    setWake(existing?.wake || "");
+    setQuality(existing?.quality || "");
+  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality]);
+
+  const save = () => {
+    store.update((s) => ({
+      ...s,
+      sleepLogs: {
+        ...s.sleepLogs,
+        [dateStr]: { bedtime, wake, quality, updatedAt: new Date().toISOString() },
+      },
+    }));
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1500);
+  };
+
+  return (
+    <Card>
+      <SectionTitle>Sleep Log</SectionTitle>
+      <Muted style={{ fontSize: 12 }}>Log last night's sleep and how you feel this morning.</Muted>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+        <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
+          <Muted>Bedtime (last night)</Muted>
+          <Input type="time" value={bedtime} onChange={(e) => setBedtime(e.target.value)} />
+        </label>
+        <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
+          <Muted>Wake time (this morning)</Muted>
+          <Input type="time" value={wake} onChange={(e) => setWake(e.target.value)} />
+        </label>
+      </div>
+      <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
+        <Muted>Sleep quality</Muted>
+        <Textarea
+          value={quality}
+          onChange={(e) => setQuality(e.target.value)}
+          placeholder="How well did you sleep? Dreams, wake-ups, energy on waking..."
+        />
+      </label>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+        <Button onClick={save}>Save</Button>
+        {saved && <Muted style={{ fontSize: 12, color: COLORS.green }}>Saved</Muted>}
+        {existing?.updatedAt && !saved && <Muted style={{ fontSize: 12 }}>Last updated {formatTs(existing.updatedAt)}</Muted>}
+      </div>
+    </Card>
+  );
+}
+
+/* ============================ THOUGHTS ============================ */
+function ThoughtsTab({ store }: { store: Store }) {
+  const [header, setHeader] = useState("");
+  const [body, setBody] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editHeader, setEditHeader] = useState("");
+  const [editBody, setEditBody] = useState("");
+
+  const add = () => {
+    if (!header.trim() && !body.trim()) return;
+    const now = new Date().toISOString();
+    store.update((s) => ({
+      ...s,
+      thoughts: [
+        { id: uid(), header: header.trim(), body: body.trim(), createdAt: now, updatedAt: now },
+        ...s.thoughts,
+      ],
+    }));
+    setHeader(""); setBody("");
+  };
+
+  const startEdit = (id: string, h: string, b: string) => {
+    setEditingId(id); setEditHeader(h); setEditBody(b);
+  };
+  const saveEdit = () => {
+    const now = new Date().toISOString();
+    store.update((s) => ({
+      ...s,
+      thoughts: s.thoughts.map((t) =>
+        t.id === editingId ? { ...t, header: editHeader, body: editBody, updatedAt: now } : t,
+      ),
+    }));
+    setEditingId(null);
+  };
+  const del = (id: string) =>
+    store.update((s) => ({ ...s, thoughts: s.thoughts.filter((t) => t.id !== id) }));
+
+  const sorted = [...store.state.thoughts].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Card>
+        <SectionTitle>New Thought</SectionTitle>
+        <div style={{ display: "grid", gap: 10 }}>
+          <Input
+            placeholder="Header (optional)"
+            value={header}
+            onChange={(e) => setHeader(e.target.value)}
+            style={{ fontWeight: 700, fontSize: 15 }}
+          />
+          <Textarea
+            placeholder="Write your thought..."
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            style={{ minHeight: 100 }}
+          />
+          <div><Button onClick={add}>Add note</Button></div>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle>Notes ({sorted.length})</SectionTitle>
+        {sorted.length === 0 && <Muted>No thoughts yet.</Muted>}
+        <div style={{ display: "grid", gap: 12 }}>
+          {sorted.map((t) => (
+            <div key={t.id} style={{ padding: "10px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+              {editingId === t.id ? (
+                <div style={{ display: "grid", gap: 8 }}>
+                  <Input
+                    value={editHeader}
+                    onChange={(e) => setEditHeader(e.target.value)}
+                    placeholder="Header (optional)"
+                    style={{ fontWeight: 700, fontSize: 15 }}
+                  />
+                  <Textarea
+                    value={editBody}
+                    onChange={(e) => setEditBody(e.target.value)}
+                    style={{ minHeight: 100 }}
+                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Button onClick={saveEdit}>Save</Button>
+                    <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {t.header && (
+                      <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{t.header}</div>
+                    )}
+                    {t.body && (
+                      <div style={{ fontSize: 14, whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{t.body}</div>
+                    )}
+                    <Muted style={{ fontSize: 11, display: "block", marginTop: 6 }}>
+                      {formatTs(t.createdAt)}
+                      {t.updatedAt && t.updatedAt !== t.createdAt && ` · edited ${formatTs(t.updatedAt)}`}
+                    </Muted>
+                  </div>
+                  <Button variant="ghost" onClick={() => startEdit(t.id, t.header, t.body)}><IconPencil /></Button>
+                  <Button variant="danger" onClick={() => del(t.id)}><IconTrash /></Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
