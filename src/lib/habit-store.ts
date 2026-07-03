@@ -7,6 +7,8 @@ import {
   type Cycle,
   type Reminder,
   type Logs,
+  type Thought,
+  type SleepLogs,
 } from "./habit-data";
 
 const KEY = "habit-tracker-state-v1";
@@ -19,6 +21,8 @@ export type State = {
   cycle: Cycle;
   reminders: Reminder[];
   seeded: boolean;
+  thoughts: Thought[];
+  sleepLogs: SleepLogs;
 };
 
 function initialState(): State {
@@ -30,6 +34,8 @@ function initialState(): State {
     cycle: { periods: [], avgCycleLength: 28, avgPeriodLength: 5 },
     reminders: [],
     seeded: true,
+    thoughts: [],
+    sleepLogs: {},
   };
 }
 
@@ -56,6 +62,8 @@ export function useHabitStore() {
           cycle: { periods: [], avgCycleLength: 28, avgPeriodLength: 5 },
           reminders: [],
           seeded: false,
+          thoughts: [],
+          sleepLogs: {},
         }
       : load(),
   );

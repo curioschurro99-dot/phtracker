@@ -35,6 +35,23 @@ export type Reminder = { id: string; habitId: string; time: string };
 
 export type Logs = Record<string, Record<string, boolean>>;
 
+export type Thought = {
+  id: string;
+  header: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SleepLog = {
+  bedtime: string; // e.g. "23:15" (previous night)
+  wake: string;    // e.g. "07:00" (this morning)
+  quality: string; // free-text description
+  updatedAt: string;
+};
+
+export type SleepLogs = Record<string, SleepLog>; // keyed by date (the wake-up date)
+
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
