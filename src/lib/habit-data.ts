@@ -23,6 +23,14 @@ export type Buy = {
   completedAt: string | null;
 };
 
+export type Grocery = {
+  id: string;
+  text: string;
+  done: boolean;
+  createdAt: string;
+  completedAt: string | null;
+};
+
 export type Period = { start: string; logged: true };
 
 export type Cycle = {

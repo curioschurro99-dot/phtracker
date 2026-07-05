@@ -14,7 +14,7 @@ import {
 import { Button, Card, COLORS, IconArrowDown, IconArrowUp, IconCheck, IconPencil, IconTrash, Input, Muted, SectionTitle, Textarea } from "./ui";
 import { DaysSelector } from "./DaysSelector";
 
-type Tab = "today" | "week" | "month" | "cycle" | "todos" | "buys" | "thoughts" | "analysis" | "habits" | "reminders";
+type Tab = "today" | "week" | "month" | "cycle" | "todos" | "buys" | "grocery" | "thoughts" | "analysis" | "habits" | "reminders";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "today", label: "Today" },
@@ -23,6 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "cycle", label: "Cycle" },
   { id: "todos", label: "To-Dos" },
   { id: "buys", label: "To-Buys" },
+  { id: "grocery", label: "Grocery" },
   { id: "thoughts", label: "Thoughts" },
   { id: "analysis", label: "Analysis" },
   { id: "habits", label: "Habits" },
@@ -94,6 +95,7 @@ export function HabitApp() {
         {tab === "cycle" && <CycleTab store={store} />}
         {tab === "todos" && <TodosTab store={store} />}
         {tab === "buys" && <BuysTab store={store} />}
+        {tab === "grocery" && <GroceryTab store={store} />}
         {tab === "thoughts" && <ThoughtsTab store={store} />}
         {tab === "analysis" && <AnalysisTab store={store} />}
         {tab === "habits" && <HabitsTab store={store} />}
@@ -448,6 +450,7 @@ function WeekTab({ store }: { store: Store }) {
             </tr>
           </thead>
           <tbody>
+            <SleepWeekRows store={store} days={days} />
             {habits.map((h) => (
               <tr key={h.id}>
                 <td style={{ padding: "10px 8px", borderTop: `1px solid ${COLORS.border}`, minWidth: 0 }}>
@@ -502,6 +505,52 @@ function startOfWeek(d: Date): Date {
   dt.setDate(dt.getDate() - offset);
   return dt;
 }
+
+function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
+  const today = todayStr();
+  const rows: Array<{ label: string; get: (log: import("@/lib/habit-data").SleepLog | undefined) => string }> = [
+    { label: "Bedtime", get: (l) => l?.bedtime || "" },
+    { label: "Wake", get: (l) => l?.wake || "" },
+    { label: "Quality", get: (l) => l?.quality || "" },
+  ];
+  return (
+    <>
+      {rows.map((row, ri) => (
+        <tr key={row.label}>
+          <td style={{ padding: "8px", borderTop: `1px solid ${COLORS.border}`, background: "#FAFAFB", minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.sub, textTransform: "uppercase", letterSpacing: 0.3 }}>
+              {ri === 0 ? "SLEEP" : ""}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>{row.label}</div>
+          </td>
+          {days.map((d, i) => {
+            const ds = todayStr(d);
+            const isToday = ds === today;
+            const value = row.get(store.state.sleepLogs[ds]);
+            return (
+              <td key={i} style={{ textAlign: "center", padding: 6, borderTop: `1px solid ${COLORS.border}`, background: isToday ? COLORS.blueBg : "#FAFAFB" }}>
+                <div
+                  title={value}
+                  style={{
+                    fontSize: 12,
+                    color: value ? COLORS.text : COLORS.sub,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    padding: "0 2px",
+                  }}
+                >
+                  {value || "—"}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+      ))}
+    </>
+  );
+}
+
 function addDays(d: Date, n: number): Date {
   const dt = new Date(d);
   dt.setDate(dt.getDate() + n);
@@ -834,6 +883,97 @@ function BuysTab({ store }: { store: Store }) {
                 <div style={{ fontSize: 14, color: COLORS.sub }}>{fmt(b.price)}</div>
                 <Muted style={{ fontSize: 12 }}>{formatTs(b.completedAt)}</Muted>
                 <Button variant="danger" onClick={() => del(b.id)}><IconTrash /></Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+/* ============================ GROCERY ============================ */
+function GroceryTab({ store }: { store: Store }) {
+  const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+
+  const add = () => {
+    if (!text.trim()) return;
+    store.update((s) => ({
+      ...s,
+      groceries: [
+        ...s.groceries,
+        { id: uid(), text: text.trim(), done: false, createdAt: new Date().toISOString(), completedAt: null },
+      ],
+    }));
+    setText("");
+  };
+  const toggle = (id: string) =>
+    store.update((s) => ({
+      ...s,
+      groceries: s.groceries.map((g) =>
+        g.id === id ? { ...g, done: !g.done, completedAt: !g.done ? new Date().toISOString() : null } : g,
+      ),
+    }));
+  const del = (id: string) =>
+    store.update((s) => ({ ...s, groceries: s.groceries.filter((g) => g.id !== id) }));
+  const saveEdit = (id: string) => {
+    store.update((s) => ({
+      ...s,
+      groceries: s.groceries.map((g) => (g.id === id ? { ...g, text: editText } : g)),
+    }));
+    setEditingId(null);
+  };
+
+  const active = store.state.groceries.filter((g) => !g.done);
+  const completed = store.state.groceries.filter((g) => g.done);
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Card>
+        <SectionTitle>Grocery</SectionTitle>
+        <Muted style={{ fontSize: 12 }}>Household items to pick up.</Muted>
+        <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Add household item..." onKeyDown={(e) => e.key === "Enter" && add()} />
+          <Button onClick={add}>Add</Button>
+        </div>
+        <div style={{ display: "grid", gap: 6 }}>
+          {active.map((g) => (
+            <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+              <Checkbox checked={g.done} onClick={() => toggle(g.id)} />
+              {editingId === g.id ? (
+                <>
+                  <Input value={editText} onChange={(e) => setEditText(e.target.value)} />
+                  <Button onClick={() => saveEdit(g.id)}>Save</Button>
+                  <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>
+                </>
+              ) : (
+                <>
+                  <div style={{ flex: 1, fontSize: 14 }}>
+                    <div>{g.text}</div>
+                    <Muted style={{ fontSize: 11 }}>Added {formatTs(g.createdAt)}</Muted>
+                  </div>
+                  <Button variant="ghost" onClick={() => { setEditingId(g.id); setEditText(g.text); }}><IconPencil /></Button>
+                  <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
+                </>
+              )}
+            </div>
+          ))}
+          {active.length === 0 && <Muted>No items on the list.</Muted>}
+        </div>
+      </Card>
+
+      {completed.length > 0 && (
+        <Card>
+          <SectionTitle>Completed ({completed.length})</SectionTitle>
+          <div style={{ display: "grid", gap: 6 }}>
+            {completed.map((g) => (
+              <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+                <Checkbox checked onClick={() => toggle(g.id)} />
+                <div style={{ flex: 1, fontSize: 14, color: COLORS.sub, textDecoration: "line-through" }}>{g.text}</div>
+                <Muted style={{ fontSize: 12 }}>{formatTs(g.completedAt)}</Muted>
+                <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
               </div>
             ))}
           </div>

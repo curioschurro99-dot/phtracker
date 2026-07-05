@@ -9,6 +9,7 @@ import {
   type Logs,
   type Thought,
   type SleepLogs,
+  type Grocery,
 } from "./habit-data";
 
 const KEY = "habit-tracker-state-v1";
@@ -23,6 +24,7 @@ export type State = {
   seeded: boolean;
   thoughts: Thought[];
   sleepLogs: SleepLogs;
+  groceries: Grocery[];
 };
 
 function initialState(): State {
@@ -36,6 +38,7 @@ function initialState(): State {
     seeded: true,
     thoughts: [],
     sleepLogs: {},
+    groceries: [],
   };
 }
 
@@ -64,6 +67,7 @@ export function useHabitStore() {
           seeded: false,
           thoughts: [],
           sleepLogs: {},
+          groceries: [],
         }
       : load(),
   );
