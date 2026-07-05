@@ -845,6 +845,97 @@ function BuysTab({ store }: { store: Store }) {
   );
 }
 
+/* ============================ GROCERY ============================ */
+function GroceryTab({ store }: { store: Store }) {
+  const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+
+  const add = () => {
+    if (!text.trim()) return;
+    store.update((s) => ({
+      ...s,
+      groceries: [
+        ...s.groceries,
+        { id: uid(), text: text.trim(), done: false, createdAt: new Date().toISOString(), completedAt: null },
+      ],
+    }));
+    setText("");
+  };
+  const toggle = (id: string) =>
+    store.update((s) => ({
+      ...s,
+      groceries: s.groceries.map((g) =>
+        g.id === id ? { ...g, done: !g.done, completedAt: !g.done ? new Date().toISOString() : null } : g,
+      ),
+    }));
+  const del = (id: string) =>
+    store.update((s) => ({ ...s, groceries: s.groceries.filter((g) => g.id !== id) }));
+  const saveEdit = (id: string) => {
+    store.update((s) => ({
+      ...s,
+      groceries: s.groceries.map((g) => (g.id === id ? { ...g, text: editText } : g)),
+    }));
+    setEditingId(null);
+  };
+
+  const active = store.state.groceries.filter((g) => !g.done);
+  const completed = store.state.groceries.filter((g) => g.done);
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Card>
+        <SectionTitle>Grocery</SectionTitle>
+        <Muted style={{ fontSize: 12 }}>Household items to pick up.</Muted>
+        <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Add household item..." onKeyDown={(e) => e.key === "Enter" && add()} />
+          <Button onClick={add}>Add</Button>
+        </div>
+        <div style={{ display: "grid", gap: 6 }}>
+          {active.map((g) => (
+            <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+              <Checkbox checked={g.done} onClick={() => toggle(g.id)} />
+              {editingId === g.id ? (
+                <>
+                  <Input value={editText} onChange={(e) => setEditText(e.target.value)} />
+                  <Button onClick={() => saveEdit(g.id)}>Save</Button>
+                  <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>
+                </>
+              ) : (
+                <>
+                  <div style={{ flex: 1, fontSize: 14 }}>
+                    <div>{g.text}</div>
+                    <Muted style={{ fontSize: 11 }}>Added {formatTs(g.createdAt)}</Muted>
+                  </div>
+                  <Button variant="ghost" onClick={() => { setEditingId(g.id); setEditText(g.text); }}><IconPencil /></Button>
+                  <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
+                </>
+              )}
+            </div>
+          ))}
+          {active.length === 0 && <Muted>No items on the list.</Muted>}
+        </div>
+      </Card>
+
+      {completed.length > 0 && (
+        <Card>
+          <SectionTitle>Completed ({completed.length})</SectionTitle>
+          <div style={{ display: "grid", gap: 6 }}>
+            {completed.map((g) => (
+              <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
+                <Checkbox checked onClick={() => toggle(g.id)} />
+                <div style={{ flex: 1, fontSize: 14, color: COLORS.sub, textDecoration: "line-through" }}>{g.text}</div>
+                <Muted style={{ fontSize: 12 }}>{formatTs(g.completedAt)}</Muted>
+                <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 /* ============================ ANALYSIS ============================ */
 function AnalysisTab({ store }: { store: Store }) {
   const [range, setRange] = useState<"month" | "quarter" | "year">("month");
