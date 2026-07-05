@@ -505,6 +505,52 @@ function startOfWeek(d: Date): Date {
   dt.setDate(dt.getDate() - offset);
   return dt;
 }
+
+function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
+  const today = todayStr();
+  const rows: Array<{ label: string; get: (log: import("@/lib/habit-data").SleepLog | undefined) => string }> = [
+    { label: "Bedtime", get: (l) => l?.bedtime || "" },
+    { label: "Wake", get: (l) => l?.wake || "" },
+    { label: "Quality", get: (l) => l?.quality || "" },
+  ];
+  return (
+    <>
+      {rows.map((row, ri) => (
+        <tr key={row.label}>
+          <td style={{ padding: "8px", borderTop: `1px solid ${COLORS.border}`, background: "#FAFAFB", minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.sub, textTransform: "uppercase", letterSpacing: 0.3 }}>
+              {ri === 0 ? "SLEEP" : ""}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>{row.label}</div>
+          </td>
+          {days.map((d, i) => {
+            const ds = todayStr(d);
+            const isToday = ds === today;
+            const value = row.get(store.state.sleepLogs[ds]);
+            return (
+              <td key={i} style={{ textAlign: "center", padding: 6, borderTop: `1px solid ${COLORS.border}`, background: isToday ? COLORS.blueBg : "#FAFAFB" }}>
+                <div
+                  title={value}
+                  style={{
+                    fontSize: 12,
+                    color: value ? COLORS.text : COLORS.sub,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    padding: "0 2px",
+                  }}
+                >
+                  {value || "—"}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+      ))}
+    </>
+  );
+}
+
 function addDays(d: Date, n: number): Date {
   const dt = new Date(d);
   dt.setDate(dt.getDate() + n);
