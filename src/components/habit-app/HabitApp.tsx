@@ -499,9 +499,6 @@ function WeekTab({ store }: { store: Store }) {
 }
 
 function startOfWeek(d: Date): Date {
-  return _startOfWeek(d);
-}
-function _startOfWeek(d: Date): Date {
   const dt = new Date(d);
   dt.setHours(0, 0, 0, 0);
   const offset = (dt.getDay() + 6) % 7; // Monday=0
