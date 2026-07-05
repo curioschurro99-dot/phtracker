@@ -26,6 +26,7 @@ export type Buy = {
 export type Grocery = {
   id: string;
   text: string;
+  price: number;
   done: boolean;
   createdAt: string;
   completedAt: string | null;

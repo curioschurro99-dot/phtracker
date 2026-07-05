@@ -895,8 +895,10 @@ function BuysTab({ store }: { store: Store }) {
 /* ============================ GROCERY ============================ */
 function GroceryTab({ store }: { store: Store }) {
   const [text, setText] = useState("");
+  const [price, setPrice] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [editPrice, setEditPrice] = useState("");
 
   const add = () => {
     if (!text.trim()) return;
@@ -904,16 +906,25 @@ function GroceryTab({ store }: { store: Store }) {
       ...s,
       groceries: [
         ...s.groceries,
-        { id: uid(), text: text.trim(), done: false, createdAt: new Date().toISOString(), completedAt: null },
+        {
+          id: uid(),
+          text: text.trim(),
+          price: Number(price) || 0,
+          done: false,
+          createdAt: new Date().toISOString(),
+          completedAt: null,
+        },
       ],
     }));
-    setText("");
+    setText(""); setPrice("");
   };
   const toggle = (id: string) =>
     store.update((s) => ({
       ...s,
       groceries: s.groceries.map((g) =>
-        g.id === id ? { ...g, done: !g.done, completedAt: !g.done ? new Date().toISOString() : null } : g,
+        g.id === id
+          ? { ...g, done: !g.done, completedAt: !g.done ? new Date().toISOString() : null }
+          : g,
       ),
     }));
   const del = (id: string) =>
@@ -921,21 +932,33 @@ function GroceryTab({ store }: { store: Store }) {
   const saveEdit = (id: string) => {
     store.update((s) => ({
       ...s,
-      groceries: s.groceries.map((g) => (g.id === id ? { ...g, text: editText } : g)),
+      groceries: s.groceries.map((g) =>
+        g.id === id ? { ...g, text: editText, price: Number(editPrice) || 0 } : g,
+      ),
     }));
     setEditingId(null);
   };
 
   const active = store.state.groceries.filter((g) => !g.done);
   const completed = store.state.groceries.filter((g) => g.done);
+  const totalActive = active.reduce((s, g) => s + (Number(g.price) || 0), 0);
+  const totalAll = store.state.groceries.reduce((s, g) => s + (Number(g.price) || 0), 0);
+  const fmt = (n: number) => "$" + (n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
       <Card>
-        <SectionTitle>Grocery</SectionTitle>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+          <SectionTitle>Grocery</SectionTitle>
+          <div style={{ display: "flex", gap: 16, fontSize: 13 }}>
+            <div><Muted>Pending: </Muted><b>{fmt(totalActive)}</b></div>
+            <div><Muted>All: </Muted><b>{fmt(totalAll)}</b></div>
+          </div>
+        </div>
         <Muted style={{ fontSize: 12 }}>Household items to pick up.</Muted>
-        <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Add household item..." onKeyDown={(e) => e.key === "Enter" && add()} />
+        <div style={{ display: "flex", gap: 8, marginTop: 12, marginBottom: 12, flexWrap: "wrap" }}>
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Item..." style={{ flex: 2, minWidth: 160 }} />
+          <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" style={{ flex: 1, minWidth: 100 }} />
           <Button onClick={add}>Add</Button>
         </div>
         <div style={{ display: "grid", gap: 6 }}>
@@ -945,6 +968,7 @@ function GroceryTab({ store }: { store: Store }) {
               {editingId === g.id ? (
                 <>
                   <Input value={editText} onChange={(e) => setEditText(e.target.value)} />
+                  <Input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} style={{ maxWidth: 100 }} />
                   <Button onClick={() => saveEdit(g.id)}>Save</Button>
                   <Button variant="secondary" onClick={() => setEditingId(null)}>Cancel</Button>
                 </>
@@ -954,7 +978,8 @@ function GroceryTab({ store }: { store: Store }) {
                     <div>{g.text}</div>
                     <Muted style={{ fontSize: 11 }}>Added {formatTs(g.createdAt)}</Muted>
                   </div>
-                  <Button variant="ghost" onClick={() => { setEditingId(g.id); setEditText(g.text); }}><IconPencil /></Button>
+                  <div style={{ fontSize: 14 }}>{fmt(Number(g.price) || 0)}</div>
+                  <Button variant="ghost" onClick={() => { setEditingId(g.id); setEditText(g.text); setEditPrice(String(g.price || 0)); }}><IconPencil /></Button>
                   <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
                 </>
               )}
@@ -972,6 +997,7 @@ function GroceryTab({ store }: { store: Store }) {
               <div key={g.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", borderBottom: `1px solid ${COLORS.border}` }}>
                 <Checkbox checked onClick={() => toggle(g.id)} />
                 <div style={{ flex: 1, fontSize: 14, color: COLORS.sub, textDecoration: "line-through" }}>{g.text}</div>
+                <div style={{ fontSize: 14, color: COLORS.sub }}>{fmt(Number(g.price) || 0)}</div>
                 <Muted style={{ fontSize: 12 }}>{formatTs(g.completedAt)}</Muted>
                 <Button variant="danger" onClick={() => del(g.id)}><IconTrash /></Button>
               </div>
