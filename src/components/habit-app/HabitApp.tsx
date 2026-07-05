@@ -14,7 +14,7 @@ import {
 import { Button, Card, COLORS, IconArrowDown, IconArrowUp, IconCheck, IconPencil, IconTrash, Input, Muted, SectionTitle, Textarea } from "./ui";
 import { DaysSelector } from "./DaysSelector";
 
-type Tab = "today" | "week" | "month" | "cycle" | "todos" | "buys" | "thoughts" | "analysis" | "habits" | "reminders";
+type Tab = "today" | "week" | "month" | "cycle" | "todos" | "buys" | "grocery" | "thoughts" | "analysis" | "habits" | "reminders";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "today", label: "Today" },
@@ -23,6 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "cycle", label: "Cycle" },
   { id: "todos", label: "To-Dos" },
   { id: "buys", label: "To-Buys" },
+  { id: "grocery", label: "Grocery" },
   { id: "thoughts", label: "Thoughts" },
   { id: "analysis", label: "Analysis" },
   { id: "habits", label: "Habits" },
@@ -94,6 +95,7 @@ export function HabitApp() {
         {tab === "cycle" && <CycleTab store={store} />}
         {tab === "todos" && <TodosTab store={store} />}
         {tab === "buys" && <BuysTab store={store} />}
+        {tab === "grocery" && <GroceryTab store={store} />}
         {tab === "thoughts" && <ThoughtsTab store={store} />}
         {tab === "analysis" && <AnalysisTab store={store} />}
         {tab === "habits" && <HabitsTab store={store} />}
