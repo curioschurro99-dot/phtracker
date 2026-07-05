@@ -450,6 +450,7 @@ function WeekTab({ store }: { store: Store }) {
             </tr>
           </thead>
           <tbody>
+            <SleepWeekRows store={store} days={days} />
             {habits.map((h) => (
               <tr key={h.id}>
                 <td style={{ padding: "10px 8px", borderTop: `1px solid ${COLORS.border}`, minWidth: 0 }}>
