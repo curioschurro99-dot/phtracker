@@ -229,20 +229,22 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
   const [bedtime, setBedtime] = useState(existing?.bedtime || "");
   const [wake, setWake] = useState(existing?.wake || "");
   const [quality, setQuality] = useState(existing?.quality || "");
+  const [note, setNote] = useState(existing?.note || "");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setBedtime(existing?.bedtime || "");
     setWake(existing?.wake || "");
     setQuality(existing?.quality || "");
-  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality]);
+    setNote(existing?.note || "");
+  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality, existing?.note]);
 
   const save = () => {
     store.update((s) => ({
       ...s,
       sleepLogs: {
         ...s.sleepLogs,
-        [dateStr]: { bedtime, wake, quality, updatedAt: new Date().toISOString() },
+        [dateStr]: { bedtime, wake, quality, note, updatedAt: new Date().toISOString() },
       },
     }));
     setSaved(true);
@@ -269,6 +271,14 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
           value={quality}
           onChange={(e) => setQuality(e.target.value)}
           placeholder="How well did you sleep? Dreams, wake-ups, energy on waking..."
+        />
+      </label>
+      <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
+        <Muted>Note for the day</Muted>
+        <Textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="How was today? e.g. Sick, Unwell, Energetic..."
         />
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
@@ -512,6 +522,7 @@ function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
     { label: "Bedtime", get: (l) => l?.bedtime || "" },
     { label: "Wake", get: (l) => l?.wake || "" },
     { label: "Quality", get: (l) => l?.quality || "" },
+    { label: "Note", get: (l) => l?.note || "" },
   ];
   return (
     <>
@@ -519,7 +530,7 @@ function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
         <tr key={row.label}>
           <td style={{ padding: "8px", borderTop: `1px solid ${COLORS.border}`, background: "#FAFAFB", minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.sub, textTransform: "uppercase", letterSpacing: 0.3 }}>
-              {ri === 0 ? "SLEEP" : ""}
+              {ri === 0 ? "SLEEP" : ri === 3 ? "DAY" : ""}
             </div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>{row.label}</div>
           </td>
@@ -734,7 +745,9 @@ function TodosTab({ store }: { store: Store }) {
   };
 
   const active = store.state.todos.filter((t) => !t.done);
-  const completed = store.state.todos.filter((t) => t.done);
+  const completed = store.state.todos
+    .filter((t) => t.done)
+    .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""));
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -1081,7 +1094,7 @@ function AnalysisTab({ store }: { store: Store }) {
   // Buys spend
   const buysInRange = store.state.buys.filter((b) => b.done && b.completedAt && b.completedAt >= todayStr(start) && b.completedAt <= todayStr(end));
   const totalSpend = buysInRange.reduce((s, b) => s + b.price, 0);
-  const fmt = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+  const fmt = (n: number) => "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const exportCsv = () => {
     const rows: string[] = ["type,date,item,value,extra"];

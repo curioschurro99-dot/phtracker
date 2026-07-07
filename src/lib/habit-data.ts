@@ -56,6 +56,7 @@ export type SleepLog = {
   bedtime: string; // e.g. "23:15" (previous night)
   wake: string;    // e.g. "07:00" (this morning)
   quality: string; // free-text description
+  note?: string;   // general note about the day (e.g. "Sick", "Energetic")
   updatedAt: string;
 };
 
