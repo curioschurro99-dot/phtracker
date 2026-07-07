@@ -522,6 +522,7 @@ function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
     { label: "Bedtime", get: (l) => l?.bedtime || "" },
     { label: "Wake", get: (l) => l?.wake || "" },
     { label: "Quality", get: (l) => l?.quality || "" },
+    { label: "Note", get: (l) => l?.note || "" },
   ];
   return (
     <>
@@ -529,7 +530,7 @@ function SleepWeekRows({ store, days }: { store: Store; days: Date[] }) {
         <tr key={row.label}>
           <td style={{ padding: "8px", borderTop: `1px solid ${COLORS.border}`, background: "#FAFAFB", minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.sub, textTransform: "uppercase", letterSpacing: 0.3 }}>
-              {ri === 0 ? "SLEEP" : ""}
+              {ri === 0 ? "SLEEP" : ri === 3 ? "DAY" : ""}
             </div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>{row.label}</div>
           </td>
