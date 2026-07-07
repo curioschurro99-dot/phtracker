@@ -745,7 +745,9 @@ function TodosTab({ store }: { store: Store }) {
   };
 
   const active = store.state.todos.filter((t) => !t.done);
-  const completed = store.state.todos.filter((t) => t.done);
+  const completed = store.state.todos
+    .filter((t) => t.done)
+    .sort((a, b) => (b.completedAt || "").localeCompare(a.completedAt || ""));
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -1092,7 +1094,7 @@ function AnalysisTab({ store }: { store: Store }) {
   // Buys spend
   const buysInRange = store.state.buys.filter((b) => b.done && b.completedAt && b.completedAt >= todayStr(start) && b.completedAt <= todayStr(end));
   const totalSpend = buysInRange.reduce((s, b) => s + b.price, 0);
-  const fmt = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+  const fmt = (n: number) => "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const exportCsv = () => {
     const rows: string[] = ["type,date,item,value,extra"];
