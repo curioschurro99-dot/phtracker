@@ -229,20 +229,22 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
   const [bedtime, setBedtime] = useState(existing?.bedtime || "");
   const [wake, setWake] = useState(existing?.wake || "");
   const [quality, setQuality] = useState(existing?.quality || "");
+  const [note, setNote] = useState(existing?.note || "");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setBedtime(existing?.bedtime || "");
     setWake(existing?.wake || "");
     setQuality(existing?.quality || "");
-  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality]);
+    setNote(existing?.note || "");
+  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality, existing?.note]);
 
   const save = () => {
     store.update((s) => ({
       ...s,
       sleepLogs: {
         ...s.sleepLogs,
-        [dateStr]: { bedtime, wake, quality, updatedAt: new Date().toISOString() },
+        [dateStr]: { bedtime, wake, quality, note, updatedAt: new Date().toISOString() },
       },
     }));
     setSaved(true);
@@ -269,6 +271,14 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
           value={quality}
           onChange={(e) => setQuality(e.target.value)}
           placeholder="How well did you sleep? Dreams, wake-ups, energy on waking..."
+        />
+      </label>
+      <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
+        <Muted>Note for the day</Muted>
+        <Textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="How was today? e.g. Sick, Unwell, Energetic..."
         />
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
