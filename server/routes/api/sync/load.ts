@@ -1,3 +1,4 @@
+import { defineEventHandler, createError } from "h3";
 import { auth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import {
