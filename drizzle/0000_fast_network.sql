@@ -1,4 +1,4 @@
-CREATE TABLE "buys" (
+CREATE TABLE IF NOT EXISTS "buys" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"text" text NOT NULL,
@@ -8,13 +8,13 @@ CREATE TABLE "buys" (
 	"completed_at" text
 );
 --> statement-breakpoint
-CREATE TABLE "cycle_meta" (
+CREATE TABLE IF NOT EXISTS "cycle_meta" (
 	"user_id" text PRIMARY KEY NOT NULL,
 	"avg_cycle_length" integer DEFAULT 28 NOT NULL,
 	"avg_period_length" integer DEFAULT 5 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "groceries" (
+CREATE TABLE IF NOT EXISTS "groceries" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"text" text NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE "groceries" (
 	"completed_at" text
 );
 --> statement-breakpoint
-CREATE TABLE "habits" (
+CREATE TABLE IF NOT EXISTS "habits" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"name" text NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE "habits" (
 	"active_days" text[] DEFAULT '{}' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "logs" (
+CREATE TABLE IF NOT EXISTS "logs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"date" text NOT NULL,
@@ -41,21 +41,21 @@ CREATE TABLE "logs" (
 	"done" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "periods" (
+CREATE TABLE IF NOT EXISTS "periods" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"start" text NOT NULL,
 	"logged" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "reminders" (
+CREATE TABLE IF NOT EXISTS "reminders" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"habit_id" text NOT NULL,
 	"time" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "sleep_logs" (
+CREATE TABLE IF NOT EXISTS "sleep_logs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"date" text NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE "sleep_logs" (
 	"updated_at" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "thoughts" (
+CREATE TABLE IF NOT EXISTS "thoughts" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"header" text DEFAULT '' NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE "thoughts" (
 	"archived" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "todos" (
+CREATE TABLE IF NOT EXISTS "todos" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"text" text NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE "todos" (
 	"completed_at" text
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" text PRIMARY KEY NOT NULL
 );
 --> statement-breakpoint
