@@ -54,7 +54,6 @@ export function HabitApp() {
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px 80px" }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.2 }}>Habit Tracker</div>
-          <Muted style={{ fontSize: 13 }}>Local-only · Atomic Habits inspired</Muted>
         </header>
 
         <nav

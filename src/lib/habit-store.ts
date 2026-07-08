@@ -12,7 +12,7 @@ import {
   type Grocery,
 } from "./habit-data";
 
-const KEY = "habit-tracker-state-v1";
+const KEY = "habit-tracker-state-v2";
 
 export type State = {
   habits: Habit[];
