@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useHabitStore } from "@/lib/habit-store";
 import { useAuth } from "@/lib/auth-context";
+import { createSyncClient } from "@/lib/sync";
 import {
   cycleInfoForDate,
   dayNameFromDate,
@@ -61,7 +62,8 @@ const TABS: { id: Tab; label: string }[] = [
 export function HabitApp() {
   const [tab, setTab] = useState<Tab>("today");
   const { userId } = useAuth();
-  const store = useHabitStore(userId);
+  const sync = userId ? createSyncClient(userId) : null;
+  const store = useHabitStore(userId, sync);
 
   // Reminders check
   useReminderNotifier(store);
@@ -2596,7 +2598,9 @@ function useReminderNotifier(store: Store) {
         if (cleaned[key]) continue;
         try {
           new Notification("Habit Tracker", { body: `Reminder: ${habit.name}` });
-        } catch {}
+        } catch {
+          void 0;
+        }
         cleaned[key] = true;
       }
       setFired(cleaned);

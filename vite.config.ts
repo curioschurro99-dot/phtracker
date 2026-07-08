@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  nitro: {
+    // Scan server/routes/ and server/api/ for additional Nitro handlers
+    // (auth via Better Auth, sync API for PostgreSQL persistence)
+    serverDir: "server",
+  },
 });

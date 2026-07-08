@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   seedHabits,
   type Habit,
@@ -11,6 +11,7 @@ import {
   type SleepLogs,
   type Grocery,
 } from "./habit-data";
+import type { SyncClient } from "./sync";
 
 function storageKey(userId?: string | null): string {
   if (userId) return `habit-tracker-state-v2-${userId}`;
@@ -57,7 +58,7 @@ function load(userId?: string | null): State {
   }
 }
 
-export function useHabitStore(userId?: string | null) {
+export function useHabitStore(userId?: string | null, syncClient?: SyncClient | null) {
   const [state, setState] = useState<State>(() =>
     typeof window === "undefined"
       ? {
@@ -75,6 +76,7 @@ export function useHabitStore(userId?: string | null) {
       : load(userId),
   );
   const [hydrated, setHydrated] = useState(false);
+  const syncTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     setState(load(userId));
@@ -85,8 +87,34 @@ export function useHabitStore(userId?: string | null) {
     if (!hydrated) return;
     try {
       window.localStorage.setItem(storageKey(userId), JSON.stringify(state));
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, [state, hydrated, userId]);
+
+  useEffect(() => {
+    if (!hydrated || !syncClient) return;
+    syncClient.load().then((serverState) => {
+      if (!serverState || !syncClient) return;
+      const hasData =
+        serverState.habits.length > 0 ||
+        Object.keys(serverState.logs).length > 0 ||
+        serverState.todos.length > 0;
+      if (!hasData) return;
+      setState((prev) => ({ ...initialState(), ...prev, ...serverState }));
+    });
+  }, [hydrated, syncClient]);
+
+  useEffect(() => {
+    if (!hydrated || !syncClient) return;
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      syncClient.save(state);
+    }, 2000);
+    return () => {
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+    };
+  }, [state, hydrated, syncClient]);
 
   const update = useCallback((fn: (s: State) => State) => setState((prev) => fn(prev)), []);
 
