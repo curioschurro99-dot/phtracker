@@ -134,6 +134,14 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-08 — Deployment: DNS / Nitro auto-imports / Docker DNS
+
+- **Explicit h3 imports**: Nitro's auto-import of `defineEventHandler`, `readBody`, `createError` may not work with TanStack Start's plugin wrapping. Always add explicit `import { defineEventHandler } from "h3"` in Nitro route files.
+- **Docker Compose `.env` vs `.env.production`**: Docker Compose only auto-reads `.env` (exact filename), not `.env.*`. On the VPS, `cp .env.production .env` so compose can resolve `${POSTGRES_PASSWORD}`. Do NOT commit `.env`.
+- **Docker container DNS**: Docker containers can't reach host's systemd-resolved at `127.0.0.53`. Configure public DNS in `/etc/docker/daemon.json`: `{"dns": ["8.8.8.8", ...]}` then `systemctl restart docker`.
+- **nginx pre-installed on VPS**: Always check `systemctl status nginx` before deploying. If present, stop and disable it so Caddy can bind ports 80/443.
+- **Caddyfile domain must match DNS**: Double-check the exact subdomain/domain in Caddyfile against the DNS record. `habit.*` vs `habits.*` is an easy typo.
+
 ### 2026-07-08 — Production hardening
 
 - **Caddy for TLS**: The `caddy:2-alpine` image is the simplest way to get automatic Let's Encrypt SSL in docker-compose. Mount a Caddyfile and `caddy_data` volume for cert persistence.
