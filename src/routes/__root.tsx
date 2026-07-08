@@ -87,16 +87,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Habit Tracker" },
       { name: "twitter:description", content: "A minimal personal habit tracker" },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91a799f4-98e6-43d2-9c3d-bb16cb7ab161/id-preview-40c90bc8--7a949c89-ddf8-49eb-a423-2774b05ab588.lovable.app-1782893089801.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91a799f4-98e6-43d2-9c3d-bb16cb7ab161/id-preview-40c90bc8--7a949c89-ddf8-49eb-a423-2774b05ab588.lovable.app-1782893089801.png",
-      },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91a799f4-98e6-43d2-9c3d-bb16cb7ab161/id-preview-40c90bc8--7a949c89-ddf8-49eb-a423-2774b05ab588.lovable.app-1782893089801.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91a799f4-98e6-43d2-9c3d-bb16cb7ab161/id-preview-40c90bc8--7a949c89-ddf8-49eb-a423-2774b05ab588.lovable.app-1782893089801.png" },
     ],
     links: [
       {

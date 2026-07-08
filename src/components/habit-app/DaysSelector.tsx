@@ -1,13 +1,7 @@
 import { ALL_DAYS, DAYS, WEEKDAYS, WEEKENDS } from "@/lib/habit-data";
 import { COLORS } from "./ui";
 
-export function DaysSelector({
-  value,
-  onChange,
-}: {
-  value: string[];
-  onChange: (v: string[]) => void;
-}) {
+export function DaysSelector({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const toggle = (d: string) => {
     onChange(value.includes(d) ? value.filter((x) => x !== d) : [...value, d]);
   };

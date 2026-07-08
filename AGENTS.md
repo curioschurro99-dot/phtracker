@@ -2,22 +2,21 @@
 
 ## Stack
 
-| Layer     | Technology                                                        |
-| --------- | ----------------------------------------------------------------- |
-| Framework | React 19 + TanStack Start (SSR via Nitro/h3)                      |
-| Routing   | TanStack Router (file-based, `src/routes/`)                       |
-| Build     | Vite 8 + `@lovable.dev/vite-tanstack-config`                      |
-| Styling   | Tailwind CSS 4 / inline `COLORS` tokens                           |
-| UI        | Radix primitives + shadcn-style components (`src/components/ui/`) |
-| State     | `localStorage`-backed React state (`src/lib/habit-store.ts`)      |
-| Language  | TypeScript (strict mode)                                          |
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TanStack Start (SSR via Nitro/h3) |
+| Routing | TanStack Router (file-based, `src/routes/`) |
+| Build | Vite 8 + `@lovable.dev/vite-tanstack-config` |
+| Styling | Tailwind CSS 4 / inline `COLORS` tokens |
+| UI | Radix primitives + shadcn-style components (`src/components/ui/`) |
+| State | `localStorage`-backed React state (`src/lib/habit-store.ts`) |
+| Language | TypeScript (strict mode) |
 
 ## Git setup
 
 Git is installed via GitHub Desktop — not in the normal PATH.
 
 **Git executable:**
-
 ```
 C:\Users\ellis\AppData\Local\GitHubDesktop\app-3.6.2\resources\app\git\cmd\git.exe
 ```
@@ -38,17 +37,16 @@ It stages all changes, commits with the given message, and pushes to `origin/mai
 
 Use conventional commits:
 
-| Prefix      | When                                         |
-| ----------- | -------------------------------------------- |
-| `feat:`     | New feature or enhancement                   |
-| `fix:`      | Bug fix                                      |
-| `refactor:` | Code restructuring (no behaviour change)     |
-| `style:`    | Formatting, whitespace, styling-only changes |
-| `chore:`    | Tooling, dependencies, config, maintenance   |
-| `docs:`     | Documentation (AGENTS.md, README, etc.)      |
+| Prefix | When |
+|---|---|
+| `feat:` | New feature or enhancement |
+| `fix:` | Bug fix |
+| `refactor:` | Code restructuring (no behaviour change) |
+| `style:` | Formatting, whitespace, styling-only changes |
+| `chore:` | Tooling, dependencies, config, maintenance |
+| `docs:` | Documentation (AGENTS.md, README, etc.) |
 
 **Examples:**
-
 ```
 scripts/auto-commit.ps1 "feat: add dark mode toggle"
 scripts/auto-commit.ps1 "fix: correct cycle day calculation for short months"
@@ -62,13 +60,13 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Dev commands
 
-| Command           | What it does              |
-| ----------------- | ------------------------- |
-| `npm run dev`     | Start dev server with HMR |
-| `npm run build`   | Production build          |
-| `npm run preview` | Preview production build  |
-| `npm run lint`    | ESLint across the project |
-| `npm run format`  | Prettier formatting       |
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start dev server with HMR |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run lint` | ESLint across the project |
+| `npm run format` | Prettier formatting |
 
 ## Code conventions
 
