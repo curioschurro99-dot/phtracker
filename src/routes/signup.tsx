@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { Card, Button, Input, COLORS } from "../components/habit-app/ui";
-import { authClient } from "../lib/auth-client";
+import { supabase } from "../lib/supabase-browser";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -26,9 +26,13 @@ function SignupPage() {
       setError("Password must be at least 6 characters");
       return;
     }
-    const { error: err } = await authClient.signUp.email({ email, password, name });
+    const { error: err } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
     if (err) {
-      setError(err.message ?? err.statusText ?? "Sign up failed");
+      setError(err.message ?? "Sign up failed");
       return;
     }
     navigate({ to: "/" });

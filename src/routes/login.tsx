@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { Card, Button, Input, COLORS } from "../components/habit-app/ui";
-import { authClient } from "../lib/auth-client";
+import { supabase } from "../lib/supabase-browser";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -16,9 +16,9 @@ function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const { error: err } = await authClient.signIn.email({ email, password });
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) {
-      setError(err.message ?? err.statusText ?? "Sign in failed");
+      setError(err.message ?? "Sign in failed");
       return;
     }
     navigate({ to: "/" });

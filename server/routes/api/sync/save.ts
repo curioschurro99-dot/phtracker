@@ -1,8 +1,7 @@
 import { defineEventHandler, readBody, createError } from "h3";
-import { auth } from "@/lib/auth-server";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 import {
-  users,
   habits,
   logs,
   todos,
@@ -17,11 +16,12 @@ import {
 import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
-  const session = await auth.api.getSession({ headers: event.headers });
-  if (!session?.user?.id) {
+  const supabase = createSupabaseServerClient(event);
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
-  const uid = session.user.id;
+  const uid = user.id;
   const body = await readBody(event);
   if (!body) {
     throw createError({ statusCode: 400, statusMessage: "Bad Request" });
