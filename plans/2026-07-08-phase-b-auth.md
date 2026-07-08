@@ -10,6 +10,7 @@
 ## Overview
 
 Add login/signup/session management so each user gets their own private data. Better Auth handles:
+
 - Email/password authentication
 - Session management (cookies, CSRF)
 - Account creation and verification
@@ -28,20 +29,20 @@ npm install @libsql/client
 
 ## Files to create
 
-| File | Purpose |
-|---|---|
-| `src/lib/auth-server.ts` | Better Auth server config (SQLite adapter, email/pw provider) |
-| `src/lib/auth-client.ts` | Better Auth browser client (`createAuthClient()`) |
+| File                       | Purpose                                                       |
+| -------------------------- | ------------------------------------------------------------- |
+| `src/lib/auth-server.ts`   | Better Auth server config (SQLite adapter, email/pw provider) |
+| `src/lib/auth-client.ts`   | Better Auth browser client (`createAuthClient()`)             |
 | `src/routes/auth/[...].ts` | Nitro catch-all route — delegates to Better Auth's h3 handler |
-| `src/routes/login.tsx` | Login page with email/password form |
-| `src/routes/signup.tsx` | Signup page with email/password form |
+| `src/routes/login.tsx`     | Login page with email/password form                           |
+| `src/routes/signup.tsx`    | Signup page with email/password form                          |
 
 ## Files to modify
 
-| File | Change |
-|---|---|
-| `src/routes/__root.tsx` | Add session check; redirect unauthenticated users to `/login` |
-| `src/routes/index.tsx` | Wrap `HabitApp` in auth guard |
+| File                     | Change                                                                      |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `src/routes/__root.tsx`  | Add session check; redirect unauthenticated users to `/login`               |
+| `src/routes/index.tsx`   | Wrap `HabitApp` in auth guard                                               |
 | `src/lib/habit-store.ts` | Scope localStorage key by `userId` (e.g. `habit-tracker-state-v2-{userId}`) |
 
 ---
@@ -111,19 +112,21 @@ export default defineNitroPlugin((app) => {
 });
 ```
 
-*(Requires creating a `server/plugins/` directory — Nitro auto-loads plugins from there.)*
+_(Requires creating a `server/plugins/` directory — Nitro auto-loads plugins from there.)_
 
 ### 5. Create login/signup pages
 
 Two TanStack routes using React components:
 
 **`src/routes/login.tsx`**
+
 - Email + password form
 - Error display
 - On success, redirect to `/`
 - Uses `authClient.signIn.email({ email, password })`
 
 **`src/routes/signup.tsx`**
+
 - Email + password + confirm password form
 - Error display
 - On success, redirect to `/login` (or auto-sign-in)

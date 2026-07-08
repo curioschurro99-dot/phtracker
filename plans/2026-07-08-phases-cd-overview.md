@@ -41,11 +41,11 @@ Write a Drizzle migration that creates all tables with references to a `user_id`
 
 Replace the skeleton `server-store.ts` with full TanStack Start server functions:
 
-| Function | Method | Description |
-|---|---|---|
-| `loadState` | GET | Fetch full user state from DB |
-| `saveState` | POST | Full-state replace (simple approach) |
-| `patchState` | PATCH | Granular update per domain (e.g. `{ todos: [...] }`) |
+| Function     | Method | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| `loadState`  | GET    | Fetch full user state from DB                        |
+| `saveState`  | POST   | Full-state replace (simple approach)                 |
+| `patchState` | PATCH  | Granular update per domain (e.g. `{ todos: [...] }`) |
 
 All functions check `auth.session.userId` before operating.
 
@@ -112,7 +112,7 @@ services:
     env_file: .env.production
     depends_on: [db]
     volumes:
-      - ./data:/app/data   # persist SQLite / uploaded data
+      - ./data:/app/data # persist SQLite / uploaded data
   db:
     image: postgres:17
     env_file: .env.production
@@ -164,8 +164,8 @@ Can be scripted in `scripts/deploy.ps1`.
 
 ## Estimated effort
 
-| Phase | Files changed/created | Complexity |
-|---|---|---|
-| B (auth) | ~8 files | Medium — mostly config + UI |
-| C (sync) | ~12 files | High — data model, sync logic, offline |
-| D (deploy) | ~5 files + VPS setup | Medium — Docker, env, one-time setup |
+| Phase      | Files changed/created | Complexity                             |
+| ---------- | --------------------- | -------------------------------------- |
+| B (auth)   | ~8 files              | Medium — mostly config + UI            |
+| C (sync)   | ~12 files             | High — data model, sync logic, offline |
+| D (deploy) | ~5 files + VPS setup  | Medium — Docker, env, one-time setup   |

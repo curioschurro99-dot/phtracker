@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useHabitStore } from "@/lib/habit-store";
+import { useAuth } from "@/lib/auth-context";
 import {
   cycleInfoForDate,
   dayNameFromDate,
@@ -59,7 +60,8 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function HabitApp() {
   const [tab, setTab] = useState<Tab>("today");
-  const store = useHabitStore();
+  const { userId } = useAuth();
+  const store = useHabitStore(userId);
 
   // Reminders check
   useReminderNotifier(store);

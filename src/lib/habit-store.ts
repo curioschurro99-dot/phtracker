@@ -12,7 +12,10 @@ import {
   type Grocery,
 } from "./habit-data";
 
-const KEY = "habit-tracker-state-v2";
+function storageKey(userId?: string | null): string {
+  if (userId) return `habit-tracker-state-v2-${userId}`;
+  return "habit-tracker-state-v2";
+}
 
 export type State = {
   habits: Habit[];
@@ -42,10 +45,10 @@ function initialState(): State {
   };
 }
 
-function load(): State {
+function load(userId?: string | null): State {
   if (typeof window === "undefined") return initialState();
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(storageKey(userId));
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as State;
     return { ...initialState(), ...parsed };
@@ -54,7 +57,7 @@ function load(): State {
   }
 }
 
-export function useHabitStore() {
+export function useHabitStore(userId?: string | null) {
   const [state, setState] = useState<State>(() =>
     typeof window === "undefined"
       ? {
@@ -69,21 +72,21 @@ export function useHabitStore() {
           sleepLogs: {},
           groceries: [],
         }
-      : load(),
+      : load(userId),
   );
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setState(load());
+    setState(load(userId));
     setHydrated(true);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!hydrated) return;
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(state));
+      window.localStorage.setItem(storageKey(userId), JSON.stringify(state));
     } catch {}
-  }, [state, hydrated]);
+  }, [state, hydrated, userId]);
 
   const update = useCallback((fn: (s: State) => State) => setState((prev) => fn(prev)), []);
 

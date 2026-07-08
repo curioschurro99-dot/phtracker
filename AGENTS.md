@@ -25,6 +25,7 @@ plans/YYYY-MM-DD-<short-description>.md
 ```
 
 The plan must cover:
+
 - Goal and scope
 - Files to create / modify
 - Implementation order
@@ -42,6 +43,7 @@ plans/YYYY-MM-DD-<short-description>-log.md
 ```
 
 The log must record:
+
 - What was implemented (list of changes per file)
 - Any bugs encountered during development and how they were fixed
 - Deviations from the original plan (if any) and why
@@ -132,4 +134,10 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
-(Add entries here after each implementation, newest first.)
+### 2026-07-08 — Phase B: Multi-user auth (Better Auth)
+
+- **Better Auth + TanStack Start**: Use `better-auth/react` for the client (has `useSession` hook), not `better-auth/client`. Mount the auth handler via a Nitro catch-all route at `server/routes/api/auth/[...all].ts` rather than a plugin — simpler and avoids configuring Nitro plugins through the config wrapper.
+- **Node.js SQLite**: `node:sqlite` module (available since Node 22.5+) works perfectly with Better Auth — pass `new DatabaseSync("./path")` directly as the `database` option. No need for `better-sqlite3` or `@libsql/client`.
+- **Windows CRLF**: Running `npm run format` (prettier) fixes CRLF issues. Always run format before lint to avoid false positives.
+- **`.env` handling**: Never commit `.env` with real secrets. Use `.gitignore` to exclude it, commit an `env.example` as a template.
+- **Prettier auto-fix**: `npm run format` before `npm run lint` — prettier can fix many issues that ESLint would otherwise report as errors.
