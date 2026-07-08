@@ -17,6 +17,9 @@ dist-ssr
 *.local
 .env
 
+# Local runtime data (SQLite auth DB, etc.)
+data/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

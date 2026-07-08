@@ -134,6 +134,13 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-08 — Nitro route scanning fix
+
+- **Nitro `serverDir` defaults to `false`**: The `@lovable.dev/vite-tanstack-config` wrapper does NOT enable Nitro file-based route scanning. To add custom server routes (e.g. `server/routes/api/`), you must explicitly set `nitro: { serverDir: "server" }` in `vite.config.ts`.
+- **Use `@/` for imports in Nitro routes**: From `server/routes/api/sync/load.ts`, relative imports like `../../../src/lib/...` resolve incorrectly. Use `@/lib/...` instead — Vite's `@` alias (`process.cwd()/src`) is inherited by the Nitro build environment.
+- **ESLint `no-empty`**: Replace `catch {}` with `catch { void 0; }` to suppress the rule with a valid expression statement.
+- **Sync merge guard**: When merging server state into local state, check that the server has actual data first. Otherwise, an empty database (new user) overwrites any local data that existed before registration.
+
 ### 2026-07-08 — Phase B: Multi-user auth (Better Auth)
 
 - **Better Auth + TanStack Start**: Use `better-auth/react` for the client (has `useSession` hook), not `better-auth/client`. Mount the auth handler via a Nitro catch-all route at `server/routes/api/auth/[...all].ts` rather than a plugin — simpler and avoids configuring Nitro plugins through the config wrapper.
