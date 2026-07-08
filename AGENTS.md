@@ -134,6 +134,15 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-08 — Production hardening
+
+- **Caddy for TLS**: The `caddy:2-alpine` image is the simplest way to get automatic Let's Encrypt SSL in docker-compose. Mount a Caddyfile and `caddy_data` volume for cert persistence.
+- **`restart: unless-stopped`**: Always set this on production Docker services so they recover from crashes or host reboots.
+- **Remove unnecessary exposed ports**: Only Caddy needs `ports:` (80/443). The app and DB communicate via Docker's internal network.
+- **Healthcheck with net.connect**: Use `require('net').createConnection(port)` for a lightweight health probe that checks if the server is listening — no HTTP endpoint needed.
+- **`.env.*` in gitignore**: `.env` only ignores the exact filename. Add `.env.*` to catch `.env.production`, `.env.dev`, etc.
+- **`sameSite: "lax"` on auth cookies**: Required for HTTPS deployments. Better Auth auto-detects `secure` from `x-forwarded-proto` header set by Caddy.
+
 ### 2026-07-08 — Remove Lovable wrapper + switch to node-server
 
 - **Lovable wrapper is optional**: `@lovable.dev/vite-tanstack-config` is MIT licensed and open source, but bundles Lovable-platform plugins (sandbox HMR gate, component tagger, error telemetry) that do nothing on a self-hosted VPS. Replacing it with a plain `vite.config.ts` importing plugins directly is straightforward (~20 lines of config).
