@@ -12,6 +12,52 @@
 | State     | `localStorage`-backed React state (`src/lib/habit-store.ts`)      |
 | Language  | TypeScript (strict mode)                                          |
 
+## Workflow
+
+All features and fixes follow a three-step process.
+
+### 1. Plan first
+
+Before any implementation, write a dated plan file to `plans/`:
+
+```
+plans/YYYY-MM-DD-<short-description>.md
+```
+
+The plan must cover:
+- Goal and scope
+- Files to create / modify
+- Implementation order
+- Key architectural decisions and tradeoffs
+- Future considerations (migration paths, open questions)
+
+Write the plan, present it to the user, and get sign-off before writing any code.
+
+### 2. Log after implementation
+
+After the plan is fully implemented and committed, write a dated implementation log to `plans/`:
+
+```
+plans/YYYY-MM-DD-<short-description>-log.md
+```
+
+The log must record:
+- What was implemented (list of changes per file)
+- Any bugs encountered during development and how they were fixed
+- Deviations from the original plan (if any) and why
+- Verification steps taken (lint, format, build, manual test)
+
+### 3. Capture lessons learned
+
+After each implementation, update the **Lessons Learned** section at the bottom of this file. Record:
+
+- Patterns that worked well (repeat for future tasks)
+- Pitfalls to avoid
+- Config or tooling quirks (e.g. Windows CRLF issues, ESLint rules, dependency gotchas)
+- Any changes to team conventions
+
+Lessons are cumulative — add new entries at the top so the most recent is easiest to find.
+
 ## Git setup
 
 Git is installed via GitHub Desktop — not in the normal PATH.
@@ -83,3 +129,7 @@ scripts/auto-commit.ps1 "chore: update dependencies"
   - `src/components/ui/` — reusable UI primitives (shadcn-style)
   - `src/lib/` — utilities, stores, data definitions
   - `src/routes/` — TanStack Router file-based routes
+
+## Lessons Learned
+
+(Add entries here after each implementation, newest first.)
