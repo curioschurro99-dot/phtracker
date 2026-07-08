@@ -134,6 +134,15 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-08 — Remove Lovable wrapper + switch to node-server
+
+- **Lovable wrapper is optional**: `@lovable.dev/vite-tanstack-config` is MIT licensed and open source, but bundles Lovable-platform plugins (sandbox HMR gate, component tagger, error telemetry) that do nothing on a self-hosted VPS. Replacing it with a plain `vite.config.ts` importing plugins directly is straightforward (~20 lines of config).
+- **`nitro` named export**: `nitro/vite` exports `{ nitro }`, not a default export. Use `import { nitro } from "nitro/vite"`.
+- **`node-server` preset**: The `cloudflare-module` preset does NOT start an HTTP server — it only exports a `fetch` handler for Cloudflare Workers. For Docker/VPS deployment, use `preset: "node-server"` which auto-starts on port 3000.
+- **`resolve.tsconfigPaths: true`**: Vite 8 has native tsconfig path resolution. No need for `vite-tsconfig-paths` plugin.
+- **Start script for auto-migration**: Use Drizzle's programmatic migrator (`drizzle-orm/postgres-js/migrator`) in a startup script to auto-apply migrations before the server starts. No need for `drizzle-kit` in production.
+- **Dockerfile needs `drizzle/` + `scripts/`**: The runner stage must copy the migration files and start script alongside the `.output/` and `node_modules/`.
+
 ### 2026-07-08 — Nitro route scanning fix
 
 - **Nitro `serverDir` defaults to `false`**: The `@lovable.dev/vite-tanstack-config` wrapper does NOT enable Nitro file-based route scanning. To add custom server routes (e.g. `server/routes/api/`), you must explicitly set `nitro: { serverDir: "server" }` in `vite.config.ts`.

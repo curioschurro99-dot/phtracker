@@ -17,6 +17,7 @@ export const auth = betterAuth({
   session: {
     cookie: {
       name: "phtracker.session",
+      sameSite: "lax",
     },
   },
 });

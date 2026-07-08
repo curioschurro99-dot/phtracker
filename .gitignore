@@ -16,6 +16,7 @@ dist-ssr
 .nitro
 *.local
 .env
+.env.*
 
 # Local runtime data (SQLite auth DB, etc.)
 data/

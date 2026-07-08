@@ -1,12 +1,22 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on:
+      - app
+    restart: unless-stopped
+
   db:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: phtracker
-      POSTGRES_PASSWORD: phtracker_dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: phtracker
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -14,11 +24,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   app:
     build: .
-    ports:
-      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -26,6 +35,20 @@ services:
       - .env.production
     volumes:
       - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('net').createConnection(3000).on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   pgdata:
+  caddy_data:
