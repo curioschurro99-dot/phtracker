@@ -134,6 +134,13 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-09 — Mobile CSS debugging discipline
+
+- **Plan small CSS fixes too**: The plan-first workflow is not just for features. Skipping it for "quick" layout tweaks leads to guessing instead of diagnosing. The Month calendar fix (overflow scroll wrapper + minWidth) worked because it addressed the root cause. The Reminders fix failed repeatedly because the same `minWidth: 0` was applied at deeper DOM levels without changing the fundamental layout. Writing a 3-line plan forces review before code ships.
+- **Two-attempt rule for CSS bugs**: If a CSS fix doesn't work on the second attempt, stop guessing and inspect the actual rendered DOM. On mobile, use Safari Web Inspector (Settings → Developer → Inspect) or Chrome DevTools device mode. Share the computed styles / box model for the overflowing element. One look at the actual box model beats an hour of speculation.
+- **Isolate before patching**: When a specific component section overflows, strip it down to bare elements and verify each layer constrains correctly. Test the flex layout in isolation (e.g. a standalone HTML file or CodeSandbox) to confirm the CSS works before layering it back into the app.
+- **Overflow pattern for flex text truncation**: `flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap` on the text element, AND `min-width: 0` on the flex container itself — but crucially, the flex container's parent must also constrain width. If the parent is a CSS Grid item without explicit `grid-template-columns: 1fr`, the grid's implicit auto-sized column can defeat the constraint.
+
 ### 2026-07-08 — Deployment: DNS / Nitro auto-imports / Docker DNS
 
 - **Explicit h3 imports**: Nitro's auto-import of `defineEventHandler`, `readBody`, `createError` may not work with TanStack Start's plugin wrapping. Always add explicit `import { defineEventHandler } from "h3"` in Nitro route files.

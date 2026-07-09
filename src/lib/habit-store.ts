@@ -76,6 +76,7 @@ export function useHabitStore(userId?: string | null, syncClient?: SyncClient | 
       : load(userId),
   );
   const [hydrated, setHydrated] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const syncTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -109,7 +110,9 @@ export function useHabitStore(userId?: string | null, syncClient?: SyncClient | 
     if (!hydrated || !syncClient) return;
     if (syncTimer.current) clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(() => {
-      syncClient.save(state);
+      syncClient.save(state).then((ok) => {
+        if (ok) setLastSavedAt(new Date().toISOString());
+      });
     }, 2000);
     return () => {
       if (syncTimer.current) clearTimeout(syncTimer.current);
@@ -118,5 +121,5 @@ export function useHabitStore(userId?: string | null, syncClient?: SyncClient | 
 
   const update = useCallback((fn: (s: State) => State) => setState((prev) => fn(prev)), []);
 
-  return { state, setState, update, hydrated };
+  return { state, setState, update, hydrated, lastSavedAt };
 }

@@ -2,6 +2,7 @@ import { defineEventHandler, readBody, createError } from "h3";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 import {
+  users,
   habits,
   logs,
   todos,
@@ -29,6 +30,8 @@ export default defineEventHandler(async (event) => {
 
   const state = body.state as Record<string, unknown>;
 
+  await db.insert(users).values({ id: uid }).onConflictDoNothing();
+
   await db.transaction(async (tx) => {
     await tx.delete(habits).where(eq(habits.userId, uid));
     await tx.delete(logs).where(eq(logs.userId, uid));
@@ -50,7 +53,7 @@ export default defineEventHandler(async (event) => {
       order: number;
       activeDays: string[];
     }>;
-    if (h) {
+    if (h.length) {
       await tx.insert(habits).values(h.map((r) => ({ ...r, userId: uid })));
     }
 
@@ -79,7 +82,7 @@ export default defineEventHandler(async (event) => {
       createdAt: string;
       completedAt: string | null;
     }>;
-    if (t) {
+    if (t.length) {
       await tx.insert(todos).values(t.map((r) => ({ ...r, userId: uid })));
     }
 
@@ -91,7 +94,7 @@ export default defineEventHandler(async (event) => {
       createdAt: string;
       completedAt: string | null;
     }>;
-    if (b) {
+    if (b.length) {
       await tx.insert(buys).values(b.map((r) => ({ ...r, userId: uid })));
     }
 
@@ -103,12 +106,12 @@ export default defineEventHandler(async (event) => {
       createdAt: string;
       completedAt: string | null;
     }>;
-    if (g) {
+    if (g.length) {
       await tx.insert(groceries).values(g.map((r) => ({ ...r, userId: uid })));
     }
 
     const p = (state.cycle as { periods?: Array<{ start: string; logged: boolean }> })?.periods;
-    if (p) {
+    if (p.length) {
       await tx.insert(periods).values(
         p.map((r) => ({
           id: `per-${uid}-${r.start}`,
@@ -129,7 +132,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const r = state.reminders as Array<{ id: string; habitId: string; time: string }>;
-    if (r) {
+    if (r.length) {
       await tx.insert(reminders).values(r.map((ri) => ({ ...ri, userId: uid })));
     }
 
@@ -141,7 +144,7 @@ export default defineEventHandler(async (event) => {
       updatedAt: string;
       archived?: boolean;
     }>;
-    if (th) {
+    if (th.length) {
       await tx
         .insert(thoughts)
         .values(th.map((ri) => ({ ...ri, userId: uid, archived: ri.archived ?? false })));

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useHabitStore } from "@/lib/habit-store";
 import { useAuth } from "@/lib/auth-context";
 import { createSyncClient } from "@/lib/sync";
@@ -61,8 +61,8 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function HabitApp() {
   const [tab, setTab] = useState<Tab>("today");
-  const { userId } = useAuth();
-  const sync = userId ? createSyncClient(userId) : null;
+  const { userId, user, signOut } = useAuth();
+  const sync = useMemo(() => (userId ? createSyncClient(userId) : null), [userId]);
   const store = useHabitStore(userId, sync);
 
   // Reminders check
@@ -83,17 +83,34 @@ export function HabitApp() {
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px 80px" }}>
-        <header
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
-          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.2 }}>Habit Tracker</div>
+        <header style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: -0.2 }}>
+            Habit Tracker
+            {user?.email && (
+              <span style={{ fontSize: 14, fontWeight: 400, color: COLORS.sub, marginLeft: 8 }}>
+                ({user.email.split("@")[0]})
+              </span>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, color: COLORS.sub, marginTop: 4 }}>
+            {store.lastSavedAt && <span>Saved {formatLastSaved(store.lastSavedAt)}</span>}
+            {store.lastSavedAt && <span>·</span>}
+            <button
+              onClick={signOut}
+              style={{
+                background: "none",
+                border: "none",
+                color: COLORS.sub,
+                cursor: "pointer",
+                fontSize: 12,
+                textDecoration: "underline",
+                padding: 0,
+                fontFamily: "inherit",
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </header>
 
         <nav
@@ -162,6 +179,14 @@ function formatTs(ts: string | null): string {
   }).formatToParts(d);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
   return `${get("day")}/${get("month")}/${get("year")} ${get("hour")}:${get("minute")}`;
+}
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function formatLastSaved(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${pad(d.getDate())}-${MONTHS[d.getMonth()]}-${d.getFullYear().toString().slice(-2)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /* ============================ TODAY ============================ */
@@ -346,11 +371,11 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
       <Muted style={{ fontSize: 12 }}>Log last night's sleep and how you feel this morning.</Muted>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
         <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
-          <Muted>Bedtime (last night)</Muted>
+          <Muted>Bedtime<br />(last night)</Muted>
           <Input type="time" value={bedtime} onChange={(e) => setBedtime(e.target.value)} />
         </label>
         <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
-          <Muted>Wake time (this morning)</Muted>
+          <Muted>Wake time<br />(this morning)</Muted>
           <Input type="time" value={wake} onChange={(e) => setWake(e.target.value)} />
         </label>
       </div>
@@ -458,7 +483,7 @@ function ThoughtsTab({ store, onNavigate }: { store: Store; onNavigate?: (tab: T
 
   return (
     <div
-      style={{ display: "grid", gridTemplateColumns: "1fr 240px", gap: 16, alignItems: "start" }}
+      style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16, alignItems: "start" }}
     >
       <div style={{ display: "grid", gap: 16 }}>
         <Card>
@@ -1066,7 +1091,8 @@ function MonthTab({ store }: { store: Store }) {
           Next →
         </Button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+      <div style={{ overflowX: "auto", margin: "0 -20px", padding: "0 20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3, minWidth: 350 }}>
         {DAYS.map((d) => (
           <div
             key={d}
@@ -1095,10 +1121,10 @@ function MonthTab({ store }: { store: Store }) {
             <div
               key={i}
               style={{
-                minHeight: 78,
+                minHeight: 44,
                 border: `1px solid ${COLORS.border}`,
                 borderRadius: 10,
-                padding: 6,
+                padding: 4,
                 background: isToday ? COLORS.blueBg : "#fff",
                 position: "relative",
               }}
@@ -1152,6 +1178,7 @@ function MonthTab({ store }: { store: Store }) {
             </div>
           );
         })}
+      </div>
       </div>
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 16 }}>
         {(["menses", "follicular", "fertile", "luteal"] as Phase[]).map((p) => {
@@ -1249,29 +1276,143 @@ function CycleTab({ store }: { store: Store }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
             <Muted>Cycle length (days)</Muted>
-            <Input
-              type="number"
-              value={c.avgCycleLength}
-              onChange={(e) =>
-                store.update((s) => ({
-                  ...s,
-                  cycle: { ...s.cycle, avgCycleLength: Number(e.target.value) || 28 },
-                }))
-              }
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                onClick={() =>
+                  store.update((s) => ({
+                    ...s,
+                    cycle: { ...s.cycle, avgCycleLength: Math.max(1, s.cycle.avgCycleLength - 1) },
+                  }))
+                }
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
+                  border: `1px solid ${COLORS.border}`,
+                  background: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: COLORS.text,
+                  lineHeight: 1,
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                –
+              </button>
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  minWidth: 36,
+                  textAlign: "center",
+                  color: COLORS.text,
+                }}
+              >
+                {c.avgCycleLength}
+              </span>
+              <button
+                onClick={() =>
+                  store.update((s) => ({
+                    ...s,
+                    cycle: { ...s.cycle, avgCycleLength: s.cycle.avgCycleLength + 1 },
+                  }))
+                }
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
+                  border: `1px solid ${COLORS.border}`,
+                  background: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: COLORS.text,
+                  lineHeight: 1,
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                +
+              </button>
+            </div>
           </label>
           <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
             <Muted>Period length (days)</Muted>
-            <Input
-              type="number"
-              value={c.avgPeriodLength}
-              onChange={(e) =>
-                store.update((s) => ({
-                  ...s,
-                  cycle: { ...s.cycle, avgPeriodLength: Number(e.target.value) || 5 },
-                }))
-              }
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button
+                onClick={() =>
+                  store.update((s) => ({
+                    ...s,
+                    cycle: { ...s.cycle, avgPeriodLength: Math.max(1, s.cycle.avgPeriodLength - 1) },
+                  }))
+                }
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
+                  border: `1px solid ${COLORS.border}`,
+                  background: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: COLORS.text,
+                  lineHeight: 1,
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                –
+              </button>
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  minWidth: 36,
+                  textAlign: "center",
+                  color: COLORS.text,
+                }}
+              >
+                {c.avgPeriodLength}
+              </span>
+              <button
+                onClick={() =>
+                  store.update((s) => ({
+                    ...s,
+                    cycle: { ...s.cycle, avgPeriodLength: s.cycle.avgPeriodLength + 1 },
+                  }))
+                }
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 999,
+                  border: `1px solid ${COLORS.border}`,
+                  background: "#fff",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  color: COLORS.text,
+                  lineHeight: 1,
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                +
+              </button>
+            </div>
           </label>
         </div>
       </Card>
@@ -2528,7 +2669,6 @@ function RemindersTab({ store }: { store: Store }) {
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            style={{ width: 130 }}
           />
           <Button onClick={add}>Add</Button>
         </div>
@@ -2536,7 +2676,7 @@ function RemindersTab({ store }: { store: Store }) {
 
       <Card>
         <SectionTitle>Reminders</SectionTitle>
-        <div style={{ display: "grid", gap: 6 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
           {store.state.reminders.map((r) => (
             <div
               key={r.id}
@@ -2544,11 +2684,12 @@ function RemindersTab({ store }: { store: Store }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
+                minWidth: 0,
                 padding: "6px 0",
                 borderBottom: `1px solid ${COLORS.border}`,
               }}
             >
-              <div style={{ flex: 1, fontSize: 14 }}>{habitName(r.habitId)}</div>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{habitName(r.habitId)}</div>
               <div style={{ fontSize: 14, fontWeight: 500 }}>{r.time}</div>
               <Button variant="danger" onClick={() => del(r.id)}>
                 <IconTrash />
