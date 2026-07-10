@@ -13,6 +13,7 @@ import {
   type Habit,
   type Phase,
 } from "@/lib/habit-data";
+import { MOODS, EMOTIONS, type Mood } from "@/lib/habit-data";
 import {
   Button,
   Card,
@@ -40,6 +41,7 @@ type Tab =
   | "grocery"
   | "thoughts"
   | "thot-archive"
+  | "gratitude"
   | "analysis"
   | "habits"
   | "reminders";
@@ -54,6 +56,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "grocery", label: "Grocery" },
   { id: "thoughts", label: "Thoughts" },
   { id: "thot-archive", label: "Thot-Archive" },
+  { id: "gratitude", label: "Gratitude" },
   { id: "analysis", label: "Analysis" },
   { id: "habits", label: "Habits" },
   { id: "reminders", label: "Reminders" },
@@ -154,6 +157,7 @@ export function HabitApp() {
         {tab === "grocery" && <GroceryTab store={store} />}
         {tab === "thoughts" && <ThoughtsTab store={store} onNavigate={setTab} />}
         {tab === "thot-archive" && <ThotArchiveTab store={store} />}
+        {tab === "gratitude" && <GratitudeTab store={store} />}
         {tab === "analysis" && <AnalysisTab store={store} />}
         {tab === "habits" && <HabitsTab store={store} />}
         {tab === "reminders" && <RemindersTab store={store} />}
