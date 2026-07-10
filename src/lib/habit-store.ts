@@ -10,6 +10,7 @@ import {
   type Thought,
   type SleepLogs,
   type Grocery,
+  type Gratitudes,
 } from "./habit-data";
 import type { SyncClient } from "./sync";
 
@@ -29,6 +30,7 @@ export type State = {
   thoughts: Thought[];
   sleepLogs: SleepLogs;
   groceries: Grocery[];
+  gratitudes: Gratitudes;
 };
 
 function initialState(): State {
@@ -43,6 +45,7 @@ function initialState(): State {
     thoughts: [],
     sleepLogs: {},
     groceries: [],
+    gratitudes: {},
   };
 }
 
