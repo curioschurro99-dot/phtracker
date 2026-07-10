@@ -8,21 +8,21 @@
 
 ### Created `phrasecraft/` — standalone Vite + React 18 SPA
 
-| File | Description |
-|------|-------------|
-| `phrasecraft/package.json` | Dependencies: React 18, Lucide React, Vite 6, Tailwind CSS 4 |
-| `phrasecraft/vite.config.ts` | Plain Vite config with `@vitejs/plugin-react` |
-| `phrasecraft/tsconfig.json` | TypeScript strict config |
-| `phrasecraft/index.html` | Entry HTML |
-| `phrasecraft/src/main.tsx` | React 18 entry point |
-| `phrasecraft/src/index.css` | Tailwind CSS v4 import |
-| `phrasecraft/src/data/categories.json` | 8 categories extracted from Bolt Supabase |
-| `phrasecraft/src/data/subcategories.json` | 62 subcategories extracted from Bolt Supabase |
-| `phrasecraft/src/data/phrases.json` | 938 phrases extracted from Bolt Supabase |
-| `phrasecraft/src/App.tsx` | Main app with full feature set (view state machine, category browsing, phrase display, favorites, search, dictionary, add custom phrase, TTS, copy) |
-| `phrasecraft/src/lib/store.ts` | `useLocalStorage` generic hook for favorites + custom phrases |
-| `phrasecraft/src/lib/icons.ts` | Lucide icon name → component map |
-| `phrasecraft/src/lib/dictionary.ts` | FreeDictionaryAPI wrapper |
+| File                                      | Description                                                                                                                                         |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `phrasecraft/package.json`                | Dependencies: React 18, Lucide React, Vite 6, Tailwind CSS 4                                                                                        |
+| `phrasecraft/vite.config.ts`              | Plain Vite config with `@vitejs/plugin-react`                                                                                                       |
+| `phrasecraft/tsconfig.json`               | TypeScript strict config                                                                                                                            |
+| `phrasecraft/index.html`                  | Entry HTML                                                                                                                                          |
+| `phrasecraft/src/main.tsx`                | React 18 entry point                                                                                                                                |
+| `phrasecraft/src/index.css`               | Tailwind CSS v4 import                                                                                                                              |
+| `phrasecraft/src/data/categories.json`    | 8 categories extracted from Bolt Supabase                                                                                                           |
+| `phrasecraft/src/data/subcategories.json` | 62 subcategories extracted from Bolt Supabase                                                                                                       |
+| `phrasecraft/src/data/phrases.json`       | 938 phrases extracted from Bolt Supabase                                                                                                            |
+| `phrasecraft/src/App.tsx`                 | Main app with full feature set (view state machine, category browsing, phrase display, favorites, search, dictionary, add custom phrase, TTS, copy) |
+| `phrasecraft/src/lib/store.ts`            | `useLocalStorage` generic hook for favorites + custom phrases                                                                                       |
+| `phrasecraft/src/lib/icons.ts`            | Lucide icon name → component map                                                                                                                    |
+| `phrasecraft/src/lib/dictionary.ts`       | FreeDictionaryAPI wrapper                                                                                                                           |
 
 ### Features (matching original app)
 
@@ -49,17 +49,17 @@
 
 ### Comparison to original
 
-| Feature | Original (Bolt) | This build |
-|---------|----------------|------------|
-| Data storage | Supabase REST API | Embedded JSON (faster, offline) |
-| Auth | Supabase Auth | None required |
-| Dictionary | Supabase edge function | FreeDictionaryAPI (free, no auth) |
-| Icons | Lucide React | Lucide React (same) |
-| Styling | Tailwind + `#2C3E50` | Tailwind CSS v4 + `#2C3E50` (same) |
-| Custom phrases | localStorage | localStorage (same) |
-| Favorites | localStorage | localStorage (same) |
-| TTS | SpeechSynthesis (en-GB, 0.9) | SpeechSynthesis (en-GB, 0.9) (same) |
-| Build | Vite (Bolt-managed) | Vite 6 (standalone) |
+| Feature        | Original (Bolt)              | This build                          |
+| -------------- | ---------------------------- | ----------------------------------- |
+| Data storage   | Supabase REST API            | Embedded JSON (faster, offline)     |
+| Auth           | Supabase Auth                | None required                       |
+| Dictionary     | Supabase edge function       | FreeDictionaryAPI (free, no auth)   |
+| Icons          | Lucide React                 | Lucide React (same)                 |
+| Styling        | Tailwind + `#2C3E50`         | Tailwind CSS v4 + `#2C3E50` (same)  |
+| Custom phrases | localStorage                 | localStorage (same)                 |
+| Favorites      | localStorage                 | localStorage (same)                 |
+| TTS            | SpeechSynthesis (en-GB, 0.9) | SpeechSynthesis (en-GB, 0.9) (same) |
+| Build          | Vite (Bolt-managed)          | Vite 6 (standalone)                 |
 
 ## Bugs encountered
 

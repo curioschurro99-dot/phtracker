@@ -3,11 +3,12 @@ import { useHabitStore } from "@/lib/habit-store";
 import { useAuth } from "@/lib/auth-context";
 import { createSyncClient } from "@/lib/sync";
 import {
-  cycleInfoForDate,
-  dayNameFromDate,
   DAYS,
   PHASE_COLORS,
   EMOTIONS,
+  MOODS,
+  cycleInfoForDate,
+  dayNameFromDate,
   todayStr,
   uid,
   ALL_DAYS,
@@ -15,7 +16,6 @@ import {
   type Mood,
   type Phase,
 } from "@/lib/habit-data";
-import { MOODS, EMOTIONS, type Mood } from "@/lib/habit-data";
 import {
   Button,
   Card,
@@ -3367,7 +3367,9 @@ function GratitudeTab({ store }: { store: Store }) {
                         </span>
                       )}
                     </div>
-                    <Muted style={{ fontSize: 11 }}>{g.items.length} item{g.items.length === 1 ? "" : "s"}</Muted>
+                    <Muted style={{ fontSize: 11 }}>
+                      {g.items.length} item{g.items.length === 1 ? "" : "s"}
+                    </Muted>
                   </div>
                   {g.items.length > 0 && (
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: COLORS.text }}>

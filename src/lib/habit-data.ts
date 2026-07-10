@@ -80,13 +80,16 @@ export type GratitudeLog = {
 
 export type GratitudeLogs = Record<string, GratitudeLog>;
 
-export type Gratitudes = Record<string, {
-  date: string;
-  items: string[];
-  mood: Mood | null;
-  emotion: string;
-  updatedAt: string;
-}>;
+export type Gratitudes = Record<
+  string,
+  {
+    date: string;
+    items: string[];
+    mood: Mood | null;
+    emotion: string;
+    updatedAt: string;
+  }
+>;
 
 export const MOODS: { id: Mood; emoji: string; label: string }[] = [
   { id: "great", emoji: "😄", label: "Great" },

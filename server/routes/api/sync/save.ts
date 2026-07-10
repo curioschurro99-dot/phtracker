@@ -18,7 +18,10 @@ import { eq } from "drizzle-orm";
 
 export default defineEventHandler(async (event) => {
   const supabase = createSupabaseServerClient(event);
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) {
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
