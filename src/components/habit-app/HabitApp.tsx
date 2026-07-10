@@ -635,7 +635,7 @@ function ThoughtsTab({ store, onNavigate }: { store: Store; onNavigate?: (tab: T
                   display: "block",
                   width: "100%",
                   textAlign: "left",
-                  background: viewingId === t.id ? COLORS.active : "none",
+                  background: viewingId === t.id ? COLORS.blueBg : "none",
                   border: "none",
                   borderRadius: 6,
                   padding: "6px 8px",
