@@ -58,6 +58,7 @@ export type SleepLog = {
   wake: string;
   quality: string;
   note?: string;
+  sleepNote?: string;
   updatedAt: string;
 };
 

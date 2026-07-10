@@ -377,6 +377,7 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
   const [wake, setWake] = useState(existing?.wake || "");
   const [quality, setQuality] = useState(existing?.quality || "");
   const [note, setNote] = useState(existing?.note || "");
+  const [sleepNote, setSleepNote] = useState(existing?.sleepNote || "");
   const [saved, setSaved] = useState(false);
 
   const QUALITY_OPTIONS = ["Great", "Good", "Okay", "Poor"];
@@ -386,14 +387,22 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
     setWake(existing?.wake || "");
     setQuality(existing?.quality || "");
     setNote(existing?.note || "");
-  }, [dateStr, existing?.bedtime, existing?.wake, existing?.quality, existing?.note]);
+    setSleepNote(existing?.sleepNote || "");
+  }, [
+    dateStr,
+    existing?.bedtime,
+    existing?.wake,
+    existing?.quality,
+    existing?.note,
+    existing?.sleepNote,
+  ]);
 
   const save = () => {
     store.update((s) => ({
       ...s,
       sleepLogs: {
         ...s.sleepLogs,
-        [dateStr]: { bedtime, wake, quality, note, updatedAt: new Date().toISOString() },
+        [dateStr]: { bedtime, wake, quality, note, sleepNote, updatedAt: new Date().toISOString() },
       },
     }));
     setSaved(true);
@@ -439,9 +448,17 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
       <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
         <Muted>Sleep note</Muted>
         <Textarea
+          value={sleepNote}
+          onChange={(e) => setSleepNote(e.target.value)}
+          placeholder="e.g. Woke up in the night, dreaming, restless..."
+        />
+      </label>
+      <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
+        <Muted>Note</Muted>
+        <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. Woke up in the night, dreaming, restless..."
+          placeholder="How was today? e.g. Sick, Unwell, Energetic..."
         />
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
@@ -647,16 +664,49 @@ function ThoughtsTab({ store, onNavigate }: { store: Store; onNavigate?: (tab: T
                             ` · edited ${formatTs(t.updatedAt)}`}
                         </Muted>
                       </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <Button variant="ghost" onClick={() => startEdit(t.id, t.header, t.body)}>
-                          <IconPencil /> Edit
-                        </Button>
-                        <Button variant="ghost" onClick={() => archive(t.id)} title="Archive">
-                          <IconArchive /> Archive
-                        </Button>
-                        <Button variant="danger" onClick={() => del(t.id)}>
-                          <IconTrash /> Delete
-                        </Button>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button
+                          onClick={() => startEdit(t.id, t.header, t.body)}
+                          title="Edit"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            color: COLORS.sub,
+                          }}
+                        >
+                          <IconPencil />
+                        </button>
+                        <button
+                          onClick={() => archive(t.id)}
+                          title="Archive"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            color: COLORS.sub,
+                          }}
+                        >
+                          <IconArchive />
+                        </button>
+                        <button
+                          onClick={() => del(t.id)}
+                          title="Delete"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "4px 6px",
+                            borderRadius: 6,
+                            color: "#C53030",
+                          }}
+                        >
+                          <IconTrash />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1173,10 +1223,10 @@ function MonthTab({ store }: { store: Store }) {
               <div
                 key={i}
                 style={{
-                  minHeight: 44,
+                  minHeight: 65,
                   border: `1px solid ${COLORS.border}`,
                   borderRadius: 10,
-                  padding: 4,
+                  padding: 6,
                   background: isToday ? COLORS.blueBg : "#fff",
                   position: "relative",
                 }}
