@@ -134,6 +134,22 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-10 — Deployment pre-flight checklist
+
+- **Run pre-flight before any deploy**: Never SSH into the VPS and start making changes before checking the current state. The checklist is:
+  1. *User* logs into Supabase dashboard and confirms project exists
+  2. *User* says the exact domain name out loud (`habits.*` not `habit.*`)
+  3. *Me* check VPS state: `docker ps`, `cat .env.production`, `cat Caddyfile`
+  4. *Me* check git history for recent infra/config changes (`git log --oneline -10`)
+  5. *Me* test the site before making changes (`curl -Is https://...`)
+  6. *Both* confirm env vars are complete against `env.example`
+- **Caddyfile domain typo is a repeat offender**: The `habit.*` vs `habits.*` mistake happened twice in this repo. Always have the user say the domain aloud before I write it anywhere.
+- **Docker build files deleted from git**: The Supabase migration commit (`db88691`) deleted `Dockerfile`, `docker-compose.yml`, and `Caddyfile` from the repo. They only existed on the VPS filesystem. Before deploying, check if these files are in git or only on the VPS.
+- **Supabase migration left env files stale**: When auth was migrated from Better Auth to Supabase, neither the local `.env` nor the VPS `.env.production` were updated with `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, or `SUPABASE_ANON_KEY`. After any auth/provider change, verify env files match `env.example`.
+- **UFW blocks Docker container networking**: The host's firewall (UFW) defaults to DROP on the FORWARD chain, which blocks Docker containers from reaching the internet. Fix: `ufw route allow in on <docker-bridge>` rules or add Docker bridge interfaces to UFW's allow list.
+- **Merge conflicts from parallel work**: When someone else pushed overlapping feature code (same gratitude tracking feature), auto-merge created duplicate imports and stale types. Always build locally after resolving conflicts to catch duplicate imports and missing exports.
+- **`.env.production` on VPS is not in git**: The VPS env file is created manually from `env.example`. After any provider change (auth, database), update both the local `.env` AND the VPS `.env.production` in the same session. Missing one causes HTTP 500 at runtime.
+
 ### 2026-07-09 — Mobile CSS debugging discipline
 
 - **Plan small CSS fixes too**: The plan-first workflow is not just for features. Skipping it for "quick" layout tweaks leads to guessing instead of diagnosing. The Month calendar fix (overflow scroll wrapper + minWidth) worked because it addressed the root cause. The Reminders fix failed repeatedly because the same `minWidth: 0` was applied at deeper DOM levels without changing the fundamental layout. Writing a 3-line plan forces review before code ships.
