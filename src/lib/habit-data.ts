@@ -80,6 +80,22 @@ export type GratitudeLog = {
 
 export type GratitudeLogs = Record<string, GratitudeLog>;
 
+export type Gratitudes = Record<string, {
+  date: string;
+  items: string[];
+  mood: Mood | null;
+  emotion: string;
+  updatedAt: string;
+}>;
+
+export const MOODS: { id: Mood; emoji: string; label: string }[] = [
+  { id: "great", emoji: "😄", label: "Great" },
+  { id: "happy", emoji: "😊", label: "Happy" },
+  { id: "okay", emoji: "😐", label: "Okay" },
+  { id: "bad", emoji: "😞", label: "Bad" },
+  { id: "sad", emoji: "😢", label: "Sad" },
+];
+
 export const EMOTIONS = [
   "Joyful",
   "Grateful",
@@ -100,7 +116,7 @@ export const EMOTIONS = [
   "Frustrated",
   "Overwhelmed",
   "Neutral",
-] as const;
+];
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 

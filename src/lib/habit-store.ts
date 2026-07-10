@@ -11,6 +11,7 @@ import {
   type SleepLogs,
   type GratitudeLogs,
   type Grocery,
+  type Gratitudes,
 } from "./habit-data";
 import type { SyncClient } from "./sync";
 
@@ -31,6 +32,7 @@ export type State = {
   sleepLogs: SleepLogs;
   gratitude: GratitudeLogs;
   groceries: Grocery[];
+  gratitudes: Gratitudes;
 };
 
 function initialState(): State {
@@ -46,6 +48,7 @@ function initialState(): State {
     sleepLogs: {},
     gratitude: {},
     groceries: [],
+    gratitudes: {},
   };
 }
 
@@ -76,6 +79,7 @@ export function useHabitStore(userId?: string | null, syncClient?: SyncClient | 
           sleepLogs: {},
           gratitude: {},
           groceries: [],
+          gratitudes: {},
         }
       : load(userId),
   );
