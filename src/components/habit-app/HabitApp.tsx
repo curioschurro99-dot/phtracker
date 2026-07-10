@@ -168,7 +168,6 @@ export function HabitApp() {
         {tab === "grocery" && <GroceryTab store={store} />}
         {tab === "thoughts" && <ThoughtsTab store={store} onNavigate={setTab} />}
         {tab === "thot-archive" && <ThotArchiveTab store={store} />}
-        {tab === "gratitude" && <GratitudeTab store={store} />}
         {tab === "analysis" && <AnalysisTab store={store} />}
         {tab === "habits" && <HabitsTab store={store} />}
         {tab === "reminders" && <RemindersTab store={store} />}
