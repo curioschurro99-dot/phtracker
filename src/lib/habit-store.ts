@@ -75,6 +75,7 @@ export function useHabitStore(userId?: string | null, syncClient?: SyncClient | 
           thoughts: [],
           sleepLogs: {},
           groceries: [],
+          gratitudes: {},
         }
       : load(userId),
   );
