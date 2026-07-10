@@ -63,6 +63,51 @@ export type SleepLog = {
 
 export type SleepLogs = Record<string, SleepLog>;
 
+export type Mood = "great" | "happy" | "okay" | "notgreat" | "sad";
+
+export type Gratitude = {
+  date: string;
+  items: string[];
+  mood: Mood | null;
+  emotion: string;
+  updatedAt: string;
+};
+
+export type Gratitudes = Record<string, Gratitude>;
+
+export const MOODS: { id: Mood; emoji: string; label: string }[] = [
+  { id: "great", emoji: "🤩", label: "Great Day" },
+  { id: "happy", emoji: "😊", label: "Happy Day" },
+  { id: "okay", emoji: "😐", label: "Okay Day" },
+  { id: "notgreat", emoji: "😕", label: "Not So Great" },
+  { id: "sad", emoji: "😢", label: "Sad Day" },
+];
+
+export const EMOTIONS = [
+  "Grateful",
+  "Joyful",
+  "Peaceful",
+  "Energized",
+  "Calm",
+  "Content",
+  "Hopeful",
+  "Inspired",
+  "Motivated",
+  "Loved",
+  "Reflective",
+  "Excited",
+  "Proud",
+  "Relieved",
+  "Anxious",
+  "Tired",
+  "Frustrated",
+  "Overwhelmed",
+  "Lonely",
+  "Sad",
+  "Angry",
+  "Restless",
+];
+
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];

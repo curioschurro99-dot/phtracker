@@ -13,6 +13,7 @@ import {
   type Habit,
   type Phase,
 } from "@/lib/habit-data";
+import { MOODS, EMOTIONS, type Mood } from "@/lib/habit-data";
 import {
   Button,
   Card,
@@ -40,6 +41,7 @@ type Tab =
   | "grocery"
   | "thoughts"
   | "thot-archive"
+  | "gratitude"
   | "analysis"
   | "habits"
   | "reminders";
@@ -54,6 +56,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "grocery", label: "Grocery" },
   { id: "thoughts", label: "Thoughts" },
   { id: "thot-archive", label: "Thot-Archive" },
+  { id: "gratitude", label: "Gratitude" },
   { id: "analysis", label: "Analysis" },
   { id: "habits", label: "Habits" },
   { id: "reminders", label: "Reminders" },
@@ -154,6 +157,7 @@ export function HabitApp() {
         {tab === "grocery" && <GroceryTab store={store} />}
         {tab === "thoughts" && <ThoughtsTab store={store} onNavigate={setTab} />}
         {tab === "thot-archive" && <ThotArchiveTab store={store} />}
+        {tab === "gratitude" && <GratitudeTab store={store} />}
         {tab === "analysis" && <AnalysisTab store={store} />}
         {tab === "habits" && <HabitsTab store={store} />}
         {tab === "reminders" && <RemindersTab store={store} />}
@@ -2751,4 +2755,280 @@ function useReminderNotifier(store: Store) {
     check();
     return () => window.clearInterval(interval);
   }, [store.state.reminders, store.state.habits, store.state.logs]);
+}
+
+/* ============================ GRATITUDE ============================ */
+function GratitudeTab({ store }: { store: Store }) {
+  const [date, setDate] = useState<string>(() => todayStr());
+  const existing = store.state.gratitudes[date];
+  const initialItems = existing?.items?.length ? existing.items : ["", "", ""];
+  const [items, setItems] = useState<string[]>(initialItems);
+  const [mood, setMood] = useState<Mood | null>(existing?.mood ?? null);
+  const [emotion, setEmotion] = useState<string>(existing?.emotion ?? "");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const e = store.state.gratitudes[date];
+    setItems(e?.items?.length ? e.items : ["", "", ""]);
+    setMood(e?.mood ?? null);
+    setEmotion(e?.emotion ?? "");
+    setSaved(false);
+  }, [date, store.state.gratitudes]);
+
+  const setItem = (i: number, v: string) => {
+    setItems((prev) => prev.map((it, idx) => (idx === i ? v : it)));
+  };
+  const addItem = () => {
+    if (items.length >= 5) return;
+    setItems((prev) => [...prev, ""]);
+  };
+  const removeItem = (i: number) => {
+    if (items.length <= 3) return;
+    setItems((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
+  const save = () => {
+    const cleaned = items.map((s) => s.trim()).filter(Boolean);
+    store.update((s) => ({
+      ...s,
+      gratitudes: {
+        ...s.gratitudes,
+        [date]: {
+          date,
+          items: cleaned,
+          mood,
+          emotion,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    }));
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1500);
+  };
+
+  const clearDay = () => {
+    store.update((s) => {
+      const next = { ...s.gratitudes };
+      delete next[date];
+      return { ...s, gratitudes: next };
+    });
+    setItems(["", "", ""]);
+    setMood(null);
+    setEmotion("");
+  };
+
+  const history = Object.values(store.state.gratitudes)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 30);
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Card>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <SectionTitle>Daily Gratitude</SectionTitle>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value || todayStr())}
+              style={{ width: 160 }}
+            />
+            <Button variant="secondary" onClick={() => setDate(todayStr())}>
+              Today
+            </Button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+            How was your day?
+          </Muted>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {MOODS.map((m) => {
+              const active = mood === m.id;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setMood(active ? null : m.id)}
+                  title={m.label}
+                  style={{
+                    background: active ? COLORS.blueBg : "#fff",
+                    border: `1px solid ${active ? COLORS.blue : COLORS.border}`,
+                    borderRadius: 12,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    minWidth: 72,
+                    gap: 2,
+                  }}
+                >
+                  <span style={{ fontSize: 24, lineHeight: 1 }}>{m.emoji}</span>
+                  <span style={{ fontSize: 11, color: COLORS.sub }}>{m.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>Emotion</Muted>
+          <select
+            value={emotion}
+            onChange={(e) => setEmotion(e.target.value)}
+            style={{
+              border: `1px solid ${COLORS.border}`,
+              borderRadius: 10,
+              padding: "8px 12px",
+              fontSize: 14,
+              background: "#fff",
+              color: COLORS.text,
+              outline: "none",
+              minWidth: 200,
+              fontFamily: "inherit",
+            }}
+          >
+            <option value="">Choose an emotion…</option>
+            {EMOTIONS.map((e) => (
+              <option key={e} value={e}>
+                {e}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+            I am grateful for… (3–5)
+          </Muted>
+          <div style={{ display: "grid", gap: 8 }}>
+            {items.map((val, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 999,
+                    background: COLORS.blueBg,
+                    color: COLORS.blue,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    flexShrink: 0,
+                  }}
+                >
+                  {i + 1}
+                </div>
+                <Input
+                  placeholder={`Gratitude ${i + 1}`}
+                  value={val}
+                  onChange={(e) => setItem(i, e.target.value)}
+                />
+                {items.length > 3 && (
+                  <Button variant="ghost" onClick={() => removeItem(i)} title="Remove">
+                    <IconTrash />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+          {items.length < 5 && (
+            <div style={{ marginTop: 8 }}>
+              <Button variant="secondary" onClick={addItem}>
+                + Add another
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <Button onClick={save}>Save</Button>
+          {existing && (
+            <Button variant="danger" onClick={clearDay}>
+              Clear day
+            </Button>
+          )}
+          {saved && <Muted style={{ fontSize: 12, color: COLORS.green }}>Saved</Muted>}
+          {existing?.updatedAt && !saved && (
+            <Muted style={{ fontSize: 12 }}>Last updated {formatTs(existing.updatedAt)}</Muted>
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle>Recent</SectionTitle>
+        {history.length === 0 ? (
+          <Muted style={{ fontSize: 13 }}>No entries yet.</Muted>
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {history.map((g) => {
+              const moodDef = g.mood ? MOODS.find((m) => m.id === g.mood) : null;
+              return (
+                <div
+                  key={g.date}
+                  style={{
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: 10,
+                    padding: 12,
+                    display: "grid",
+                    gap: 6,
+                    cursor: "pointer",
+                    background: g.date === date ? COLORS.blueBg : "#fff",
+                  }}
+                  onClick={() => setDate(g.date)}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {moodDef && <span style={{ fontSize: 20 }}>{moodDef.emoji}</span>}
+                      <strong style={{ fontSize: 14 }}>{g.date}</strong>
+                      {g.emotion && (
+                        <span
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            background: "#F5F5F7",
+                            color: COLORS.sub,
+                          }}
+                        >
+                          {g.emotion}
+                        </span>
+                      )}
+                    </div>
+                    <Muted style={{ fontSize: 11 }}>{g.items.length} item{g.items.length === 1 ? "" : "s"}</Muted>
+                  </div>
+                  {g.items.length > 0 && (
+                    <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: COLORS.text }}>
+                      {g.items.map((it, i) => (
+                        <li key={i}>{it}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
 }
