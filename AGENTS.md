@@ -137,12 +137,12 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 ### 2026-07-10 — Deployment pre-flight checklist
 
 - **Run pre-flight before any deploy**: Never SSH into the VPS and start making changes before checking the current state. The checklist is:
-  1. *User* logs into Supabase dashboard and confirms project exists
-  2. *User* says the exact domain name out loud (`habits.*` not `habit.*`)
-  3. *Me* check VPS state: `docker ps`, `cat .env.production`, `cat Caddyfile`
-  4. *Me* check git history for recent infra/config changes (`git log --oneline -10`)
-  5. *Me* test the site before making changes (`curl -Is https://...`)
-  6. *Both* confirm env vars are complete against `env.example`
+  1. _User_ logs into Supabase dashboard and confirms project exists
+  2. _User_ says the exact domain name out loud (`habits.*` not `habit.*`)
+  3. _Me_ check VPS state: `docker ps`, `cat .env.production`, `cat Caddyfile`
+  4. _Me_ check git history for recent infra/config changes (`git log --oneline -10`)
+  5. _Me_ test the site before making changes (`curl -Is https://...`)
+  6. _Both_ confirm env vars are complete against `env.example`
 - **Caddyfile domain typo is a repeat offender**: The `habit.*` vs `habits.*` mistake happened twice in this repo. Always have the user say the domain aloud before I write it anywhere.
 - **Docker build files deleted from git**: The Supabase migration commit (`db88691`) deleted `Dockerfile`, `docker-compose.yml`, and `Caddyfile` from the repo. They only existed on the VPS filesystem. Before deploying, check if these files are in git or only on the VPS.
 - **Supabase migration left env files stale**: When auth was migrated from Better Auth to Supabase, neither the local `.env` nor the VPS `.env.production` were updated with `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, or `SUPABASE_ANON_KEY`. After any auth/provider change, verify env files match `env.example`.

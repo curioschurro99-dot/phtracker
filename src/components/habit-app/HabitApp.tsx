@@ -611,18 +611,18 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
       </div>
 
       <Muted style={{ fontSize: 13, marginTop: 12, marginBottom: 6 }}>How was your day?</Muted>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {moods.map((m) => (
           <button
             key={m.value}
             onClick={() => setMood(mood === m.value ? null : m.value)}
             style={{
-              padding: "6px 14px",
-              borderRadius: 20,
+              padding: "8px 18px",
+              borderRadius: 24,
               border: `1px solid ${COLORS.border}`,
               background: mood === m.value ? COLORS.blue : COLORS.card,
               color: mood === m.value ? "#fff" : COLORS.text,
-              fontSize: 13,
+              fontSize: 14,
               cursor: "pointer",
             }}
           >
@@ -631,7 +631,16 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
         ))}
       </div>
 
-      <Muted style={{ fontSize: 13, marginTop: 16, marginBottom: 6 }}>
+      <div
+        style={{
+          height: 1,
+          background: COLORS.border,
+          margin: "20px 0",
+          opacity: 0.4,
+        }}
+      />
+
+      <Muted style={{ fontSize: 13, marginBottom: 8 }}>
         What emotions describe your day? ({emotions.length}/5)
       </Muted>
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
@@ -642,14 +651,14 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
               key={e}
               onClick={() => toggleEmotion(e)}
               style={{
-                padding: "4px 12px",
+                padding: "5px 14px",
                 borderRadius: 16,
                 border: `1px solid ${COLORS.border}`,
                 background: selected ? "#2C3E50" : COLORS.card,
                 color: selected ? "#fff" : COLORS.text,
                 fontSize: 12,
                 cursor: "pointer",
-                opacity: emotions.length >= 5 && !selected ? 0.4 : 1,
+                opacity: emotions.length >= 5 && !selected ? 0.35 : 1,
               }}
             >
               {e}
@@ -658,13 +667,36 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
         })}
       </div>
 
-      <Muted style={{ fontSize: 13, marginTop: 16, marginBottom: 6 }}>
-        What are you grateful for?
-      </Muted>
-      <div style={{ display: "grid", gap: 8 }}>
+      <div
+        style={{
+          height: 1,
+          background: COLORS.border,
+          margin: "20px 0",
+          opacity: 0.4,
+        }}
+      />
+
+      <Muted style={{ fontSize: 13, marginBottom: 8 }}>What are you grateful for?</Muted>
+      <div style={{ display: "grid", gap: 10 }}>
         {entries.map((entry, idx) => (
           <div key={entry.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Muted style={{ fontSize: 13, width: 20, flexShrink: 0 }}>{idx + 1}.</Muted>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 999,
+                background: COLORS.blueBg,
+                color: COLORS.blue,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                fontWeight: 600,
+                flexShrink: 0,
+              }}
+            >
+              {idx + 1}
+            </div>
             {editingId === entry.id ? (
               <div style={{ display: "flex", gap: 6, flex: 1 }}>
                 <Input
@@ -733,7 +765,16 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
         )}
       </div>
 
-      <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 16 }}>
+      <div
+        style={{
+          height: 1,
+          background: COLORS.border,
+          margin: "20px 0",
+          opacity: 0.4,
+        }}
+      />
+
+      <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
         <Muted>Message to God/Universe</Muted>
         <Textarea
           value={messageToUniverse}
@@ -743,7 +784,7 @@ function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
         />
       </label>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
         <Button onClick={save}>Save</Button>
         {saved && <Muted style={{ fontSize: 12, color: COLORS.green }}>Saved</Muted>}
       </div>

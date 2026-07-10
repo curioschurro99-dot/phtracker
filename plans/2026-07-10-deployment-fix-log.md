@@ -2,15 +2,15 @@
 
 ## What was implemented
 
-| File | Action |
-|------|--------|
-| `/root/phtracker/.env.production` (VPS) | Fixed `BETTER_AUTH_URL` domain, added all 4 Supabase env vars |
-| `/root/phtracker/Dockerfile` (VPS) | Created from old container snapshot |
-| `/root/phtracker/docker-compose.yml` (VPS) | Created from old container snapshot |
-| `/root/phtracker/Caddyfile` (VPS) | Created with correct `habits.appletreegarden.com` domain |
-| `.env` (local) | Added Supabase credentials |
-| `AGENTS.md` | Added deployment pre-flight checklist lesson |
-| `plans/2026-07-10-deployment-fix.md` | Plan file |
+| File                                       | Action                                                        |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| `/root/phtracker/.env.production` (VPS)    | Fixed `BETTER_AUTH_URL` domain, added all 4 Supabase env vars |
+| `/root/phtracker/Dockerfile` (VPS)         | Created from old container snapshot                           |
+| `/root/phtracker/docker-compose.yml` (VPS) | Created from old container snapshot                           |
+| `/root/phtracker/Caddyfile` (VPS)          | Created with correct `habits.appletreegarden.com` domain      |
+| `.env` (local)                             | Added Supabase credentials                                    |
+| `AGENTS.md`                                | Added deployment pre-flight checklist lesson                  |
+| `plans/2026-07-10-deployment-fix.md`       | Plan file                                                     |
 
 ## Bugs encountered during deployment
 
