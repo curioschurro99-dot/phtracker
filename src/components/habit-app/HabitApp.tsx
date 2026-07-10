@@ -6,7 +6,6 @@ import {
   DAYS,
   PHASE_COLORS,
   EMOTIONS,
-  MOODS,
   cycleInfoForDate,
   dayNameFromDate,
   todayStr,
@@ -50,6 +49,7 @@ type Tab =
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "today", label: "Today" },
+  { id: "gratitude", label: "Gratitude" },
   { id: "week", label: "Week" },
   { id: "month", label: "Month" },
   { id: "cycle", label: "Cycle" },
@@ -58,7 +58,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "grocery", label: "Grocery" },
   { id: "thoughts", label: "Thoughts" },
   { id: "thot-archive", label: "Thot-Archive" },
-  { id: "gratitude", label: "Gratitude" },
   { id: "analysis", label: "Analysis" },
   { id: "habits", label: "Habits" },
   { id: "reminders", label: "Reminders" },
@@ -160,6 +159,7 @@ export function HabitApp() {
         </nav>
 
         {tab === "today" && <TodayTab store={store} />}
+        {tab === "gratitude" && <GratitudeTab store={store} />}
         {tab === "week" && <WeekTab store={store} />}
         {tab === "month" && <MonthTab store={store} />}
         {tab === "cycle" && <CycleTab store={store} />}
@@ -348,7 +348,6 @@ function TodayTab({ store }: { store: Store }) {
       </Card>
 
       <SleepLogCard store={store} dateStr={today} />
-      <GratitudeCard store={store} dateStr={today} />
     </div>
   );
 }
@@ -458,340 +457,6 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
 }
 
 /* ============================ GRATITUDE ============================ */
-function GratitudeCard({ store, dateStr }: { store: Store; dateStr: string }) {
-  const [viewDate, setViewDate] = useState(dateStr);
-  const gratitudeLog = store.state.gratitude[viewDate];
-
-  const [mood, setMood] = useState<Mood | null>(gratitudeLog?.mood ?? null);
-  const [emotions, setEmotions] = useState<string[]>(gratitudeLog?.emotions ?? []);
-  const [entries, setEntries] = useState<{ id: string; text: string }[]>(
-    gratitudeLog?.entries ?? [],
-  );
-  const [messageToUniverse, setMessageToUniverse] = useState(gratitudeLog?.messageToUniverse ?? "");
-  const [newEntry, setNewEntry] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    setMood(gratitudeLog?.mood ?? null);
-    setEmotions(gratitudeLog?.emotions ?? []);
-    setEntries(gratitudeLog?.entries ?? []);
-    setMessageToUniverse(gratitudeLog?.messageToUniverse ?? "");
-  }, [viewDate, gratitudeLog]);
-
-  const save = () => {
-    store.update((s) => ({
-      ...s,
-      gratitude: {
-        ...s.gratitude,
-        [viewDate]: {
-          mood,
-          emotions,
-          entries,
-          messageToUniverse,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-    }));
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1500);
-  };
-
-  const toggleEmotion = (emotion: string) => {
-    if (emotions.includes(emotion)) {
-      setEmotions(emotions.filter((e) => e !== emotion));
-    } else if (emotions.length < 5) {
-      setEmotions([...emotions, emotion]);
-    }
-  };
-
-  const addEntry = () => {
-    if (!newEntry.trim() || entries.length >= 5) return;
-    setEntries([...entries, { id: uid(), text: newEntry.trim() }]);
-    setNewEntry("");
-  };
-
-  const deleteEntry = (id: string) => {
-    setEntries(entries.filter((e) => e.id !== id));
-  };
-
-  const startEditEntry = (id: string, text: string) => {
-    setEditingId(id);
-    setEditText(text);
-  };
-
-  const saveEditEntry = () => {
-    if (!editText.trim() || !editingId) return;
-    setEntries(entries.map((e) => (e.id === editingId ? { ...e, text: editText.trim() } : e)));
-    setEditingId(null);
-    setEditText("");
-  };
-
-  const prevDay = () => {
-    const d = new Date(viewDate + "T00:00:00");
-    d.setDate(d.getDate() - 1);
-    setViewDate(todayStr(d));
-  };
-
-  const nextDay = () => {
-    const d = new Date(viewDate + "T00:00:00");
-    d.setDate(d.getDate() + 1);
-    setViewDate(todayStr(d));
-  };
-
-  const MONTHS = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const vd = new Date(viewDate + "T00:00:00");
-  const viewLabel = `${DAY_NAMES[vd.getDay()]}, ${MONTHS[vd.getMonth()]} ${vd.getDate()}`;
-  const isToday = viewDate === dateStr;
-
-  const moods: { value: Mood; emoji: string; label: string }[] = [
-    { value: "great", emoji: "😄", label: "Great" },
-    { value: "happy", emoji: "😊", label: "Happy" },
-    { value: "okay", emoji: "😐", label: "Okay" },
-    { value: "bad", emoji: "😞", label: "Bad" },
-    { value: "sad", emoji: "😢", label: "Sad" },
-  ];
-
-  return (
-    <Card>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
-        <SectionTitle>Gratitude</SectionTitle>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button
-            onClick={prevDay}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 18,
-              padding: "4px 8px",
-            }}
-          >
-            {"<"}
-          </button>
-          <Muted style={{ fontSize: 12, whiteSpace: "nowrap" }}>{viewLabel}</Muted>
-          <button
-            onClick={nextDay}
-            disabled={isToday}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: isToday ? "default" : "pointer",
-              fontSize: 18,
-              padding: "4px 8px",
-              opacity: isToday ? 0.3 : 1,
-            }}
-          >
-            {">"}
-          </button>
-        </div>
-      </div>
-
-      <Muted style={{ fontSize: 13, marginTop: 12, marginBottom: 6 }}>How was your day?</Muted>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {moods.map((m) => (
-          <button
-            key={m.value}
-            onClick={() => setMood(mood === m.value ? null : m.value)}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 24,
-              border: `1px solid ${COLORS.border}`,
-              background: mood === m.value ? COLORS.blue : COLORS.card,
-              color: mood === m.value ? "#fff" : COLORS.text,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
-            {m.emoji} {m.label}
-          </button>
-        ))}
-      </div>
-
-      <div
-        style={{
-          height: 1,
-          background: COLORS.border,
-          margin: "20px 0",
-          opacity: 0.4,
-        }}
-      />
-
-      <Muted style={{ fontSize: 13, marginBottom: 8 }}>
-        What emotions describe your day? ({emotions.length}/5)
-      </Muted>
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-        {EMOTIONS.map((e) => {
-          const selected = emotions.includes(e);
-          return (
-            <button
-              key={e}
-              onClick={() => toggleEmotion(e)}
-              style={{
-                padding: "5px 14px",
-                borderRadius: 16,
-                border: `1px solid ${COLORS.border}`,
-                background: selected ? "#2C3E50" : COLORS.card,
-                color: selected ? "#fff" : COLORS.text,
-                fontSize: 12,
-                cursor: "pointer",
-                opacity: emotions.length >= 5 && !selected ? 0.35 : 1,
-              }}
-            >
-              {e}
-            </button>
-          );
-        })}
-      </div>
-
-      <div
-        style={{
-          height: 1,
-          background: COLORS.border,
-          margin: "20px 0",
-          opacity: 0.4,
-        }}
-      />
-
-      <Muted style={{ fontSize: 13, marginBottom: 8 }}>What are you grateful for?</Muted>
-      <div style={{ display: "grid", gap: 10 }}>
-        {entries.map((entry, idx) => (
-          <div key={entry.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 999,
-                background: COLORS.blueBg,
-                color: COLORS.blue,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 600,
-                flexShrink: 0,
-              }}
-            >
-              {idx + 1}
-            </div>
-            {editingId === entry.id ? (
-              <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                <Input
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveEditEntry();
-                  }}
-                />
-                <Button onClick={saveEditEntry}>Save</Button>
-              </div>
-            ) : (
-              <div
-                style={{
-                  flex: 1,
-                  fontSize: 13,
-                  minWidth: 0,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {entry.text}
-              </div>
-            )}
-            <button
-              onClick={() => startEditEntry(entry.id, entry.text)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 14,
-                padding: 4,
-              }}
-            >
-              ✏️
-            </button>
-            <button
-              onClick={() => deleteEntry(entry.id)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 14,
-                padding: 4,
-              }}
-            >
-              🗑️
-            </button>
-          </div>
-        ))}
-        {entries.length < 5 && (
-          <div style={{ display: "flex", gap: 8 }}>
-            <Input
-              value={newEntry}
-              onChange={(e) => setNewEntry(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addEntry();
-              }}
-              placeholder="I am grateful for..."
-              style={{ flex: 1 }}
-            />
-            <Button onClick={addEntry} disabled={!newEntry.trim()}>
-              Add
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{
-          height: 1,
-          background: COLORS.border,
-          margin: "20px 0",
-          opacity: 0.4,
-        }}
-      />
-
-      <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
-        <Muted>Message to God/Universe</Muted>
-        <Textarea
-          value={messageToUniverse}
-          onChange={(e) => setMessageToUniverse(e.target.value)}
-          placeholder="Dear God, thank you for..."
-          rows={3}
-        />
-      </label>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16 }}>
-        <Button onClick={save}>Save</Button>
-        {saved && <Muted style={{ fontSize: 12, color: COLORS.green }}>Saved</Muted>}
-      </div>
-    </Card>
-  );
-}
-
 /* ============================ THOUGHTS ============================ */
 function ThoughtsTab({ store, onNavigate }: { store: Store; onNavigate?: (tab: Tab) => void }) {
   const [header, setHeader] = useState("");
@@ -3154,20 +2819,24 @@ function useReminderNotifier(store: Store) {
 /* ============================ GRATITUDE ============================ */
 function GratitudeTab({ store }: { store: Store }) {
   const [date, setDate] = useState<string>(() => todayStr());
-  const existing = store.state.gratitudes[date];
-  const initialItems = existing?.items?.length ? existing.items : ["", "", ""];
-  const [items, setItems] = useState<string[]>(initialItems);
-  const [mood, setMood] = useState<Mood | null>(existing?.mood ?? null);
-  const [emotion, setEmotion] = useState<string>(existing?.emotion ?? "");
+  const gratitudeLog = store.state.gratitude[date];
+
+  const [mood, setMood] = useState<Mood | null>(gratitudeLog?.mood ?? null);
+  const [emotions, setEmotions] = useState<string[]>(gratitudeLog?.emotions ?? []);
+  const [items, setItems] = useState<string[]>(
+    gratitudeLog?.entries?.length ? gratitudeLog.entries.map((e) => e.text) : ["", "", ""],
+  );
+  const [messageToUniverse, setMessageToUniverse] = useState(gratitudeLog?.messageToUniverse ?? "");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const e = store.state.gratitudes[date];
-    setItems(e?.items?.length ? e.items : ["", "", ""]);
-    setMood(e?.mood ?? null);
-    setEmotion(e?.emotion ?? "");
+    const gl = store.state.gratitude[date];
+    setMood(gl?.mood ?? null);
+    setEmotions(gl?.emotions ?? []);
+    setItems(gl?.entries?.length ? gl.entries.map((e) => e.text) : ["", "", ""]);
+    setMessageToUniverse(gl?.messageToUniverse ?? "");
     setSaved(false);
-  }, [date, store.state.gratitudes]);
+  }, [date, store.state.gratitude]);
 
   const setItem = (i: number, v: string) => {
     setItems((prev) => prev.map((it, idx) => (idx === i ? v : it)));
@@ -3181,17 +2850,25 @@ function GratitudeTab({ store }: { store: Store }) {
     setItems((prev) => prev.filter((_, idx) => idx !== i));
   };
 
+  const toggleEmotion = (emotion: string) => {
+    if (emotions.includes(emotion)) {
+      setEmotions(emotions.filter((e) => e !== emotion));
+    } else if (emotions.length < 5) {
+      setEmotions([...emotions, emotion]);
+    }
+  };
+
   const save = () => {
     const cleaned = items.map((s) => s.trim()).filter(Boolean);
     store.update((s) => ({
       ...s,
-      gratitudes: {
-        ...s.gratitudes,
+      gratitude: {
+        ...s.gratitude,
         [date]: {
-          date,
-          items: cleaned,
           mood,
-          emotion,
+          emotions,
+          entries: cleaned.map((text) => ({ id: uid(), text })),
+          messageToUniverse,
           updatedAt: new Date().toISOString(),
         },
       },
@@ -3202,18 +2879,58 @@ function GratitudeTab({ store }: { store: Store }) {
 
   const clearDay = () => {
     store.update((s) => {
-      const next = { ...s.gratitudes };
+      const next = { ...s.gratitude };
       delete next[date];
-      return { ...s, gratitudes: next };
+      return { ...s, gratitude: next };
     });
-    setItems(["", "", ""]);
     setMood(null);
-    setEmotion("");
+    setEmotions([]);
+    setItems(["", "", ""]);
+    setMessageToUniverse("");
   };
 
-  const history = Object.values(store.state.gratitudes)
+  const history = Object.entries(store.state.gratitude)
+    .map(([d, log]) => ({ date: d, ...log }))
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 30);
+
+  const isToday = date === todayStr();
+  const vd = new Date(date + "T00:00:00");
+  const MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const viewLabel = `${DAY_NAMES[vd.getDay()]}, ${MONTHS[vd.getMonth()]} ${vd.getDate()}`;
+
+  const prevDay = () => {
+    const d = new Date(date + "T00:00:00");
+    d.setDate(d.getDate() - 1);
+    setDate(todayStr(d));
+  };
+  const nextDay = () => {
+    const d = new Date(date + "T00:00:00");
+    d.setDate(d.getDate() + 1);
+    setDate(todayStr(d));
+  };
+
+  const moods: { value: Mood; emoji: string; label: string }[] = [
+    { value: "great", emoji: "😄", label: "Great" },
+    { value: "happy", emoji: "😊", label: "Happy" },
+    { value: "okay", emoji: "😐", label: "Okay" },
+    { value: "bad", emoji: "😞", label: "Bad" },
+    { value: "sad", emoji: "😢", label: "Sad" },
+  ];
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -3221,123 +2938,140 @@ function GratitudeTab({ store }: { store: Store }) {
         <div
           style={{
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 12,
-            gap: 12,
+            justifyContent: "space-between",
+            gap: 8,
             flexWrap: "wrap",
           }}
         >
-          <SectionTitle>Daily Gratitude</SectionTitle>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value || todayStr())}
-              style={{ width: 160 }}
-            />
-            <Button variant="secondary" onClick={() => setDate(todayStr())}>
-              Today
-            </Button>
+          <SectionTitle>Gratitude</SectionTitle>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={prevDay}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 18,
+                padding: "4px 8px",
+              }}
+            >
+              {"<"}
+            </button>
+            <Muted style={{ fontSize: 12, whiteSpace: "nowrap" }}>{viewLabel}</Muted>
+            <button
+              onClick={nextDay}
+              disabled={isToday}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: isToday ? "default" : "pointer",
+                fontSize: 18,
+                padding: "4px 8px",
+                opacity: isToday ? 0.3 : 1,
+              }}
+            >
+              {">"}
+            </button>
           </div>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
-            How was your day?
-          </Muted>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {MOODS.map((m) => {
-              const active = mood === m.id;
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => setMood(active ? null : m.id)}
-                  title={m.label}
-                  style={{
-                    background: active ? COLORS.blueBg : "#fff",
-                    border: `1px solid ${active ? COLORS.blue : COLORS.border}`,
-                    borderRadius: 12,
-                    padding: "8px 12px",
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    minWidth: 72,
-                    gap: 2,
-                  }}
-                >
-                  <span style={{ fontSize: 24, lineHeight: 1 }}>{m.emoji}</span>
-                  <span style={{ fontSize: 11, color: COLORS.sub }}>{m.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        <Muted style={{ fontSize: 13, marginTop: 12, marginBottom: 6 }}>How was your day?</Muted>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {moods.map((m) => (
+            <button
+              key={m.value}
+              onClick={() => setMood(mood === m.value ? null : m.value)}
+              style={{
+                padding: "8px 18px",
+                borderRadius: 24,
+                border: `1px solid ${COLORS.border}`,
+                background: mood === m.value ? COLORS.blue : COLORS.card,
+                color: mood === m.value ? "#fff" : COLORS.text,
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
+              {m.emoji} {m.label}
+            </button>
+          ))}
         </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>Emotion</Muted>
-          <select
-            value={emotion}
-            onChange={(e) => setEmotion(e.target.value)}
-            style={{
-              border: `1px solid ${COLORS.border}`,
-              borderRadius: 10,
-              padding: "8px 12px",
-              fontSize: 14,
-              background: "#fff",
-              color: COLORS.text,
-              outline: "none",
-              minWidth: 200,
-              fontFamily: "inherit",
-            }}
-          >
-            <option value="">Choose an emotion…</option>
-            {EMOTIONS.map((e) => (
-              <option key={e} value={e}>
+        <div style={{ height: 1, background: COLORS.border, margin: "20px 0", opacity: 0.4 }} />
+
+        <Muted style={{ fontSize: 13, marginBottom: 8 }}>
+          What emotions describe your day? ({emotions.length}/5)
+        </Muted>
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {EMOTIONS.map((e) => {
+            const selected = emotions.includes(e);
+            return (
+              <button
+                key={e}
+                onClick={() => toggleEmotion(e)}
+                style={{
+                  padding: "5px 14px",
+                  borderRadius: 16,
+                  border: `1px solid ${COLORS.border}`,
+                  background: selected ? "#2C3E50" : COLORS.card,
+                  color: selected ? "#fff" : COLORS.text,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  opacity: emotions.length >= 5 && !selected ? 0.35 : 1,
+                }}
+              >
                 {e}
-              </option>
-            ))}
-          </select>
+              </button>
+            );
+          })}
         </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <Muted style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
-            I am grateful for… (3–5)
-          </Muted>
-          <div style={{ display: "grid", gap: 8 }}>
-            {items.map((val, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 999,
-                    background: COLORS.blueBg,
-                    color: COLORS.blue,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    flexShrink: 0,
-                  }}
-                >
-                  {i + 1}
-                </div>
-                <Input
-                  placeholder={`Gratitude ${i + 1}`}
-                  value={val}
-                  onChange={(e) => setItem(i, e.target.value)}
-                />
-                {items.length > 3 && (
-                  <Button variant="ghost" onClick={() => removeItem(i)} title="Remove">
-                    <IconTrash />
-                  </Button>
-                )}
+        <div style={{ height: 1, background: COLORS.border, margin: "20px 0", opacity: 0.4 }} />
+
+        <Muted style={{ fontSize: 13, marginBottom: 8 }}>I am grateful for…</Muted>
+        <div style={{ display: "grid", gap: 8 }}>
+          {items.map((val, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 999,
+                  background: COLORS.blueBg,
+                  color: COLORS.blue,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
+                {i + 1}
               </div>
-            ))}
-          </div>
+              <Input
+                placeholder={`Gratitude ${i + 1}`}
+                value={val}
+                onChange={(e) => setItem(i, e.target.value)}
+                style={{ flex: 1 }}
+              />
+              {items.length > 3 && (
+                <button
+                  onClick={() => removeItem(i)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    padding: 4,
+                  }}
+                  title="Remove"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
+          ))}
           {items.length < 5 && (
             <div style={{ marginTop: 8 }}>
               <Button variant="secondary" onClick={addItem}>
@@ -3347,16 +3081,30 @@ function GratitudeTab({ store }: { store: Store }) {
           )}
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ height: 1, background: COLORS.border, margin: "20px 0", opacity: 0.4 }} />
+
+        <label style={{ display: "grid", gap: 6, fontSize: 13 }}>
+          <Muted>Message to God/Universe</Muted>
+          <Textarea
+            value={messageToUniverse}
+            onChange={(e) => setMessageToUniverse(e.target.value)}
+            placeholder="Dear God, thank you for..."
+            rows={3}
+          />
+        </label>
+
+        <div
+          style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 16 }}
+        >
           <Button onClick={save}>Save</Button>
-          {existing && (
+          {store.state.gratitude[date] && (
             <Button variant="danger" onClick={clearDay}>
               Clear day
             </Button>
           )}
           {saved && <Muted style={{ fontSize: 12, color: COLORS.green }}>Saved</Muted>}
-          {existing?.updatedAt && !saved && (
-            <Muted style={{ fontSize: 12 }}>Last updated {formatTs(existing.updatedAt)}</Muted>
+          {gratitudeLog?.updatedAt && !saved && (
+            <Muted style={{ fontSize: 12 }}>Last updated {formatTs(gratitudeLog.updatedAt)}</Muted>
           )}
         </div>
       </Card>
@@ -3368,7 +3116,7 @@ function GratitudeTab({ store }: { store: Store }) {
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             {history.map((g) => {
-              const moodDef = g.mood ? MOODS.find((m) => m.id === g.mood) : null;
+              const moodDef = moods.find((m) => m.value === g.mood);
               return (
                 <div
                   key={g.date}
@@ -3394,28 +3142,37 @@ function GratitudeTab({ store }: { store: Store }) {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       {moodDef && <span style={{ fontSize: 20 }}>{moodDef.emoji}</span>}
                       <strong style={{ fontSize: 14 }}>{g.date}</strong>
-                      {g.emotion && (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            padding: "2px 8px",
-                            borderRadius: 999,
-                            background: "#F5F5F7",
-                            color: COLORS.sub,
-                          }}
-                        >
-                          {g.emotion}
-                        </span>
+                      {g.emotions?.length > 0 && (
+                        <div style={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                          {g.emotions.slice(0, 3).map((em: string) => (
+                            <span
+                              key={em}
+                              style={{
+                                fontSize: 10,
+                                padding: "1px 6px",
+                                borderRadius: 999,
+                                background: "#F5F5F7",
+                                color: COLORS.sub,
+                              }}
+                            >
+                              {em}
+                            </span>
+                          ))}
+                          {g.emotions.length > 3 && (
+                            <Muted style={{ fontSize: 10 }}>+{g.emotions.length - 3}</Muted>
+                          )}
+                        </div>
                       )}
                     </div>
                     <Muted style={{ fontSize: 11 }}>
-                      {g.items.length} item{g.items.length === 1 ? "" : "s"}
+                      {g.entries?.length ?? 0} item
+                      {(g.entries?.length ?? 0) === 1 ? "" : "s"}
                     </Muted>
                   </div>
-                  {g.items.length > 0 && (
+                  {g.entries?.length > 0 && (
                     <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: COLORS.text }}>
-                      {g.items.map((it, i) => (
-                        <li key={i}>{it}</li>
+                      {g.entries.map((it: { id: string; text: string }, i: number) => (
+                        <li key={it.id || i}>{it.text}</li>
                       ))}
                     </ul>
                   )}
