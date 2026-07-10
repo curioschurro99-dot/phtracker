@@ -437,11 +437,11 @@ function SleepLogCard({ store, dateStr }: { store: Store; dateStr: string }) {
         </div>
       </div>
       <label style={{ display: "grid", gap: 6, fontSize: 13, marginTop: 12 }}>
-        <Muted>Note for the day</Muted>
+        <Muted>Sleep note</Muted>
         <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="How was today? e.g. Sick, Unwell, Energetic..."
+          placeholder="e.g. Woke up in the night, dreaming, restless..."
         />
       </label>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
