@@ -63,6 +63,45 @@ export type SleepLog = {
 
 export type SleepLogs = Record<string, SleepLog>;
 
+export type Mood = "great" | "happy" | "okay" | "bad" | "sad";
+
+export type GratitudeEntry = {
+  id: string;
+  text: string;
+};
+
+export type GratitudeLog = {
+  mood: Mood | null;
+  emotions: string[];
+  entries: GratitudeEntry[];
+  messageToUniverse: string;
+  updatedAt: string;
+};
+
+export type GratitudeLogs = Record<string, GratitudeLog>;
+
+export const EMOTIONS = [
+  "Joyful",
+  "Grateful",
+  "Content",
+  "Peaceful",
+  "Hopeful",
+  "Excited",
+  "Loved",
+  "Energized",
+  "Calm",
+  "Motivated",
+  "Inspired",
+  "Confident",
+  "Relaxed",
+  "Anxious",
+  "Stressed",
+  "Tired",
+  "Frustrated",
+  "Overwhelmed",
+  "Neutral",
+] as const;
+
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
