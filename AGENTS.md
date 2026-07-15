@@ -134,6 +134,14 @@ scripts/auto-commit.ps1 "chore: update dependencies"
 
 ## Lessons Learned
 
+### 2026-07-10 — Gratitude merge + repo extraction
+
+- **Keep rich types, add compat aliases**: When merging divergent feature branches where remote has simpler types than local, keep the richer schema and add a backward-compatibility type alias. This preserves the full data model while satisfying the remote's references.
+- **Auto-merge can create duplicate imports**: After resolving a merge conflict with divergent feature work, always `npm run build` to catch duplicate imports that auto-merge may have introduced.
+- **Git rebase needs an editor on Windows**: The default `vi` editor is unavailable in PowerShell. Before rebasing, set `GIT_EDITOR=notepad` or configure core.editor. If a rebase partially fails, manually clean `.git/rebase-merge/` and `git rebase --abort`.
+- **Plan-after-fact is valid for post-mortems**: For debugging/recovery sessions (e.g. deployment fix), writing the plan retrospectively still provides documentation value and captures the root-cause analysis.
+- **Check `git status` before auto-committing**: The `auto-commit.ps1` script runs `git add -A`, which stages untracked files. Review staged changes first to avoid accidentally committing config or temp files.
+
 ### 2026-07-10 — Deployment pre-flight checklist
 
 - **Run pre-flight before any deploy**: Never SSH into the VPS and start making changes before checking the current state. The checklist is:
